@@ -1,0 +1,2979 @@
+<!DOCTYPE html>
+<!-- GPS MDB v51 — 2026-03-29 — bouton formulaire Live 3 cohérent or + vérif négo LI -->
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GPS MDB — Cédric Buard</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+:root{
+  --bg:#e8e6de;
+  --surface:#ffffff;
+  --border:#e8e6e0;
+  --text:#1a1a18;
+  --text2:#6b6b65;
+  --text3:#9e9e96;
+  --accent:#1a1a18;
+  --go:#1a5c3a;
+  --go-bg:#edf7f1;
+  --go-border:#b6dfc8;
+  --stop:#8b2020;
+  --stop-bg:#fdf0f0;
+  --stop-border:#f0b8b8;
+  --warn:#7a5500;
+  --warn-bg:#fdf8ec;
+  --warn-border:#f0d98a;
+  --blue:#1a3a6b;
+  --radius:10px;
+  --shadow:0 1px 3px rgba(0,0,0,0.06),0 4px 12px rgba(0,0,0,0.04);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+  font-family:'DM Sans',sans-serif;
+  font-size:14px;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* TOPBAR */
+.topbar{
+  background:var(--text);
+  color:#fff;
+  padding:0 16px;
+  min-height:48px;
+  display:flex;
+  align-items:center;
+  position:sticky;
+  top:0;
+  z-index:100;
+  gap:6px;
+  border-bottom:1px solid #333;
+  flex-wrap:wrap;
+}
+.topbar h1{
+  font-size:13px;
+  font-weight:600;
+  letter-spacing:-0.2px;
+  white-space:nowrap;
+  margin-right:6px;
+  flex-shrink:0;
+  min-width:0;
+}
+
+.bsel{display:flex;align-items:center;gap:5px;flex-wrap:wrap;flex-shrink:0}
+.bsel select{
+  padding:4px 8px;
+  border-radius:6px;
+  border:1px solid #444;
+  background:#2a2a28;
+  color:#fff;
+  font-size:11px;
+  font-family:'DM Sans',sans-serif;
+  max-width:150px;
+}
+
+/* BOUTONS TOPBAR */
+.topbar button, .topbar a{
+  padding:4px 9px;
+  border-radius:6px;
+  border:1px solid #444;
+  background:transparent;
+  color:#fff;
+  font-size:11px;
+  font-family:'DM Sans',sans-serif;
+  cursor:pointer;
+  white-space:nowrap;
+  text-decoration:none;
+  transition:all .15s;
+  display:inline-flex;
+  align-items:center;
+  gap:3px;
+  flex-shrink:0;
+}
+.topbar button:hover,.topbar a:hover{background:#333;border-color:#666}
+.topbar .btn-save{background:#1a5c3a;border-color:#1a5c3a;color:#fff}
+.topbar .btn-save:hover{background:#145030}
+.topbar .btn-del{border-color:#8b2020;color:#f87171}
+.topbar .btn-del:hover{background:#2a1010}
+.topbar .btn-rules{background:#1a3a6b;border-color:#1a3a6b}
+.topbar .btn-hist{background:#4a2a10;border-color:#4a2a10}
+.topbar .btn-docs{background:#0f4c81;border-color:#0f4c81}
+
+
+/* TABS */
+.tabs{
+  display:flex;
+  flex-wrap:wrap;
+  gap:4px;
+  padding:10px 20px;
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  position:sticky;
+  top:52px;
+  z-index:99;
+}
+.tab{
+  padding:5px 12px;
+  border-radius:20px;
+  cursor:pointer;
+  font-size:12px;
+  font-weight:500;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--text2);
+  transition:all .15s;
+  white-space:nowrap;
+}
+.tab:hover{border-color:#aaa;color:var(--text)}
+.tab.active{background:var(--text);color:#fff;border-color:var(--text)}
+
+/* LAYOUT */
+.wrap{max-width:900px;margin:0 auto;padding:20px 16px 60px}
+.screen{display:none}
+.screen.active{display:block}
+
+/* CARDS */
+.card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:18px 20px;
+  margin-bottom:12px;
+  box-shadow:var(--shadow);
+}
+.card h3{
+  font-size:13px;
+  font-weight:600;
+  letter-spacing:0.1px;
+  margin:-18px -20px 16px;
+  padding:12px 20px;
+  background:var(--text);
+  color:#fff;
+  border-radius:var(--radius) var(--radius) 0 0;
+  border-bottom:1px solid #333;
+}
+.card h4{
+  font-size:11px;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:0.6px;
+  color:var(--text2);
+  margin:16px 0 8px;
+}
+.card h4:first-child{margin-top:0}
+.card h4.section{
+  background:var(--text);
+  color:#fff;
+  padding:5px 10px;
+  border-radius:6px;
+  margin:14px -4px 8px;
+  font-size:10px;
+  letter-spacing:0.8px;
+}
+
+/* FORM */
+.lbl{
+  display:block;
+  font-size:11px;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+  color:var(--text3);
+  margin-bottom:5px;
+  margin-top:10px;
+}
+input[type=text],input[type=number],input[type=date],input[type=time],select,textarea{
+  width:100%;
+  padding:9px 12px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  font-size:13px;
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  transition:border-color .15s;
+  outline:none;
+}
+input:focus,select:focus,textarea:focus{border-color:#888;background:#fff}
+textarea{resize:vertical;min-height:70px}
+
+/* GRID 2 COL */
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:600px){.r2{grid-template-columns:1fr}}
+
+/* BOUTONS */
+.btn{
+  padding:8px 16px;
+  border-radius:8px;
+  border:1px solid var(--border);
+  background:var(--surface);
+  color:var(--text);
+  font-size:13px;
+  font-weight:500;
+  font-family:'DM Sans',sans-serif;
+  cursor:pointer;
+  transition:all .15s;
+}
+.btn:hover{border-color:#999;background:var(--bg)}
+.btn-sm{padding:5px 12px;font-size:12px}
+
+/* BOUTONS LIENS */
+.btn-lien{
+  display:inline-block;
+  padding:7px 14px;
+  border-radius:8px;
+  font-size:12px;
+  font-weight:500;
+  text-decoration:none;
+  border:1px solid var(--border);
+  background:var(--surface);
+  color:var(--text);
+  transition:all .15s;
+  cursor:pointer;
+  white-space:nowrap;
+}
+.btn-lien:hover{border-color:#999;background:var(--bg)}
+@keyframes flashClick{0%{background:var(--text);color:#fff}100%{background:var(--surface);color:var(--text)}}
+.btn-lien.flash{animation:flashClick .4s ease}
+
+/* ALERTES */
+.hl{
+  background:var(--warn-bg);
+  border:1px solid var(--warn-border);
+  border-radius:8px;
+  padding:10px 14px;
+  font-size:12px;
+  color:var(--warn);
+  margin:10px 0;
+}
+.rb{border-radius:8px;padding:12px 16px;margin:8px 0}
+.rb.go{background:var(--go-bg);border:1px solid var(--go-border)}
+.rb.stop{background:var(--stop-bg);border:1px solid var(--stop-border)}
+.rb.warn{background:var(--warn-bg);border:1px solid var(--warn-border)}
+.rl{font-size:13px;font-weight:600}
+.rb.go .rl{color:var(--go)}
+.rb.stop .rl{color:var(--stop)}
+.rb.warn .rl{color:var(--warn)}
+.rn{font-size:11px;color:var(--text2);margin-top:4px}
+
+/* MARGE SCÉNARIOS */
+.m4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}
+@media(max-width:600px){.m4{grid-template-columns:repeat(2,1fr)}}
+.mc{border-radius:8px;padding:12px;text-align:center;border:1px solid var(--border)}
+.mc.g{background:var(--go-bg);border-color:var(--go-border)}
+.mc.w{background:var(--warn-bg);border-color:var(--warn-border)}
+.mc.s{background:var(--stop-bg);border-color:var(--stop-border)}
+.v{font-size:22px;font-weight:700;font-family:'DM Mono',monospace;letter-spacing:-1px}
+.gt{color:var(--go)}
+.wt{color:var(--warn)}
+.st{color:var(--stop)}
+.lb{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text2);margin-top:3px}
+
+/* DÉTAIL MARGE */
+.fr{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px}
+.fr:last-child{border-bottom:none}
+.fr.tot{font-weight:600;background:var(--bg);margin:4px -4px;padding:8px 4px;border-radius:6px;border:none}
+.fl{color:var(--text2)}
+
+/* SÉPARATEUR */
+.sep{border:none;border-top:1px solid var(--border);margin:16px 0}
+
+/* CHECKLIST */
+.cl{list-style:none;display:flex;flex-direction:column;gap:0}
+.cl li{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+.cl li:last-child{border-bottom:none}
+.cl input[type=checkbox]{width:16px;height:16px;flex-shrink:0;margin-top:2px;accent-color:var(--go);cursor:pointer}
+.cl label{font-size:13px;cursor:pointer;line-height:1.5}
+
+/* PROCESS STEPS */
+.ps{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.ps:last-child{border-bottom:none}
+.pn{
+  width:28px;height:28px;
+  border-radius:50%;
+  background:var(--text);
+  color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;
+  flex-shrink:0;
+  font-family:'DM Mono',monospace;
+}
+.pc h4{font-size:13px;font-weight:600;text-transform:none;letter-spacing:0;color:var(--text);margin:0 0 2px}
+.pc p{font-size:12px;color:var(--text2);margin-top:2px}
+
+/* LIVES */
+.lvc{border-radius:var(--radius);padding:16px;margin-bottom:10px;border:1px solid var(--border)}
+.lv-btn{padding:7px 14px;border-radius:20px;border:2px solid var(--border);background:transparent;color:#666;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
+.lv-btn:hover{border-color:#1a5c3a;color:#1a5c3a}
+.lv-btn.active-lv{background:#1a1a18;color:#fff;border-color:#1a1a18}
+.dv-row{display:flex;justify-content:space-between;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--border);gap:12px}
+.dv-row:last-child{border-bottom:none}
+.dv-l{font-size:12px;color:#666;flex-shrink:0;max-width:50%}
+.dv-v{font-size:13px;color:#1a1a18;text-align:right;word-break:break-word}
+.dv-v.gold{color:#1a5c3a;font-weight:600}
+.doc-item-gps{background:#f8f7f4;border:1px solid var(--border);border-radius:8px;padding:10px}
+.btn-ouvrir{padding:4px 10px;font-size:11px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer;white-space:nowrap}
+.btn-ouvrir:hover{border-color:#1a5c3a;color:#1a5c3a}
+.l1{background:#f0f6ff;border-color:#c5d8f5}
+.l2{background:#f0faf4;border-color:#b6dfc8}
+.l3{background:#fefce8;border-color:#f0d98a}
+.lvc h3{font-size:14px;font-weight:600;margin-bottom:4px}
+
+/* SCRIPT / SMS */
+.sb{
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:14px;
+  font-size:13px;
+  line-height:1.7;
+  white-space:pre-wrap;
+  font-family:'DM Mono',monospace;
+}
+.sms{
+  background:#1a1a18;
+  color:#e8e8e2;
+  border-radius:8px;
+  padding:14px;
+  font-size:12px;
+  line-height:1.8;
+  white-space:pre-wrap;
+  font-family:'DM Mono',monospace;
+}
+
+/* TABLEAU */
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{padding:8px 10px;text-align:left;border-bottom:2px solid var(--border);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;color:var(--text2);background:var(--bg)}
+td{padding:8px 10px;border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}
+
+/* MOBILE */
+@media(max-width:600px){
+  .topbar{padding:8px 12px;gap:4px}
+  .topbar h1{font-size:11px;flex-shrink:0;width:100%}
+  .bsel{width:100%;gap:4px}
+  .bsel select{max-width:140px;font-size:11px;flex:1}
+  .topbar button,.topbar a{padding:4px 7px;font-size:10px}
+  .wrap{padding:12px 10px 60px}
+  .card{padding:14px 14px}
+  .tabs{padding:8px 10px;top:auto;position:static}
+  .tab{font-size:11px;padding:4px 9px}
+  .m4{grid-template-columns:repeat(2,1fr)}
+  .v{font-size:18px}
+}
+
+.lscope 
+
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h1>🎯 GPS MDB — Cédric Buard</h1>
+  <div class="bsel">
+    <select id="b_sel" onchange="loadBien()"><option value="">— Sélectionner un bien —</option></select>
+    <button onclick="newBien()" class="">➕ Nouveau</button>
+    <button onclick="saveBien()" class="btn-save">💾 Sauvegarder</button>
+    <button onclick="deleteBien()" class="btn-del">🗑️ Supprimer</button>
+    <button onclick="ST('t10')" class="btn-rules">📋 Règles</button>
+    <button onclick="ST('t11');renderHist()" class="btn-hist">📊 Historique</button>
+    <a href="https://drive.google.com/drive/folders/1cSg4yZFKmiUrR22DwvzrdFqseTyEP84Y" target="_blank" class="btn-docs">📁 Docs LI</a>
+  </div>
+</div>
+
+<div class="wrap">
+<div class="tabs">
+  <div data-target="t1" class="tab" onclick="ST('t1')">1·Annonce</div>
+  
+  <div data-target="t4" class="tab" onclick="ST('t4')">2·Appel</div>
+  <div data-target="t5" class="tab" onclick="ST('t5')">3·PLU+Visite</div>
+  <div data-target="t3" class="tab" onclick="ST('t3')">4·Marge</div>
+  <div data-target="t6" class="tab" onclick="ST('t6')">5·Drive</div>
+  <div data-target="t7" class="tab" onclick="ST('t7')">6·Lives</div>
+  <div data-target="t8" class="tab" onclick="ST('t8')">7·Offre</div>
+  <div data-target="t9" class="tab" onclick="ST('t9')">8·Post</div>
+
+</div>
+
+<!-- T1 ANNONCE -->
+<div id="t1" class="screen active">
+  <div class="card">
+    <h3>Infos annonce — 30 secondes</h3>
+    <span class="lbl">Lien annonce</span><input type="text" id="f_lien" placeholder="https://... (LBC / SeLoger / Bienici)">
+    <div class="r2">
+      <div><span class="lbl">Prix affiché (€)</span><input type="number" id="f_prix" placeholder="289900" oninput="calcPre();autoSave()"></div>
+      <div><span class="lbl">Date mise en ligne</span><input type="date" id="f_date" onchange="checkAge();autoSave()"></div>
+    </div>
+    <div class="r2">
+      <div><span class="lbl">Surface maison (m²)</span><input type="number" id="f_sm" placeholder="73" oninput="calcPre();autoSave()"></div>
+      <div><span class="lbl">Surface terrain (m²)</span><input type="number" id="f_st" placeholder="2000 min" oninput="document.getElementById('f_tdiv').value='';document.getElementById('f_nlots').value='';calcPre();autoSave()"></div>
+      <div><span class="lbl">Terrain maison (m²) <span style="font-weight:400;color:#aaa">— partie avec la maison</span></span><input type="number" id="f_st_maison" placeholder="430" oninput="document.getElementById('f_tdiv').value='';document.getElementById('f_nlots').value='';document.getElementById('f_nlots_manual').value='';calcPre();autoSave()"></div>
+      <div><span class="lbl">Nombre de lots terrains <span style="font-weight:400;color:#aaa">— laisser vide = calcul auto</span></span><input type="number" id="f_nlots_manual" placeholder="ex: 2" min="1" max="10" oninput="document.getElementById('f_nlots').value=this.value||'';calcPre();autoSave()"></div>
+    </div>
+    <div class="r2">
+      <div><span class="lbl">Zone</span>
+        <select id="f_zone" onchange="calcPre();autoSave()">
+          <option value="">-- choisir la zone --</option>
+          <option value="115">Changé (53810) — DVF 115€/m² · bâti 2 230€/m² ★★★</option>
+          <option value="126">Vitré (35500) — DVF 126€/m² (pess.) · bâti 2 490€/m² ★★★</option>
+          <option value="126f">Fougères (35300) — DVF 126€/m² (pess.) · bâti 1 800€/m² ★ DERNIER RECOURS</option>
+          <option value="115sb">Saint-Berthevin (53940) — proxy 115€/m² · bâti 2 098€/m² ★★</option>
+          <option value="115bo">Bonchamp (53960) — proxy 115€/m² · bâti 2 088€/m² ★★ meilleur profil</option>
+          <option value="115lh">L'Huisserie (53970) — proxy 115€/m² · bâti 2 080€/m² ★★ +10% pop.</option>
+        </select>
+      </div>
+      <div><span class="lbl">État du bien (maison)</span>
+        <select id="f_etat_bien" onchange="showNegoHint();calcPre();autoSave()">
+          <option value="0">Bon état (0%)</option>
+          <option value="0.12">Rafraîchissement simple (-15% pessimiste)</option>
+          <option value="0.20">Rénovation légère (-23% pessimiste)</option>
+          <option value="0.30">Grosse rénovation (-30%) → STOP</option>
+        </select></div>
+      <div><span class="lbl">Type de bien</span>
+        <select id="f_type" onchange="autoSave()">
+          <option value="parcellaire">Division parcellaire</option>
+          <option value="terrain">Terrain nu</option>
+          <option value="bati">Division bâti (immeuble)</option>
+        </select>
+      </div>
+    </div>
+    <span class="lbl">Agent (nom + téléphone)</span><input type="text" id="f_agent" placeholder="IAD — Pierre Martin — 06 12 34 56 78" oninput="autoSave()">
+
+    <div id="age_r" style="margin-top:8px"></div>
+    <div style="margin-top:10px">
+      <span class="lbl">Négociation estimée (%)</span>
+      <div id="nego_hint" style="font-size:11px;color:#7a5500;background:#fdf8ec;border:1px solid #f0d98a;border-radius:6px;padding:6px 10px;margin-bottom:6px;display:none"></div>
+      <select id="f_nego_pct" onchange="calcPre();autoSave()">
+        <option value="0">0% — prix affiché</option>
+        <option value="5">-5%</option>
+        <option value="10">-10%</option>
+        <option value="15" selected>-15%</option>
+        <option value="20">-20%</option>
+        <option value="25">-25%</option>
+        <option value="30">-30%</option>
+      </select>
+    </div>
+    <!-- Champs cachés partagés avec onglet Marge -->
+    <input type="hidden" id="f_tdiv">
+    <input type="hidden" id="f_nlots">
+    <input type="hidden" id="f_pmaison">
+    <div id="pre_r" style="margin-top:6px"></div>
+  </div>
+  <div class="card">
+    <h3>Ce que tu vois sur l'annonce — filtres rapides</h3>
+    <div style="background:#edf7f1;border:1px solid #b6dfc8;border-radius:8px;padding:10px;margin-bottom:12px;font-size:12px;color:#1a5c3a">
+      <strong>🎯 Objectif 100k net (70k toi + 30k LI) :</strong> terrain divisible ≥ 1 500m² · bon état ou rafraîchissement · Vitré ★★★ ou Changé ★★★ priorité · toutes zones acceptées si bien exceptionnel
+    </div>
+    <ul class="cl">
+      <li><input type="checkbox" id="s1" onchange="autoSave()"><label for="s1">Terrain divisible ≥ 1 500 m² — objectif 100k net (total terrain souvent ≥ 2 000m²)</label></li>
+      <li><input type="checkbox" id="s2" onchange="autoSave()"><label for="s2">État bon ou rafraîchissement léger uniquement — pas de rénovation lourde</label></li>
+      <li><input type="checkbox" id="s3" onchange="autoSave()"><label for="s3">Zone prioritaire : Vitré ★★★ ou Changé ★★★ uniquement pour 100k</label></li>
+      <li><input type="checkbox" id="s4" onchange="autoSave()"><label for="s4">En vente depuis + 3 mois minimum (6 mois OU situation urgente pour soumission LI)</label></li>
+      <li><input type="checkbox" id="s5" onchange="autoSave()"><label for="s5">Prix baissé ← visible sur Castorus</label></li>
+      <li><input type="checkbox" id="s6" onchange="autoSave()"><label for="s6">Succession / divorce / urgence mentionnés — signal de négociation</label></li>
+    </ul>
+    <div style="background:#f8f7f4;border-radius:8px;padding:10px;margin-top:10px;font-size:12px;color:#666;border-left:3px solid #ddd">
+      <strong style="color:#1a1a1a">Rappel :</strong> motivation vendeur → tu ne peux pas savoir sur l'annonce. Tu obtiens ces infos pendant l'appel agent (onglet <strong>2·Appel</strong>).
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🔍 Signaux faibles — vendeur négociable ?</h3>
+    <p style="font-size:11px;color:#888;margin-bottom:10px">Lire entre les lignes de l'annonce avant d'appeler. Plus de signaux cochés = pression vendeur = marge de négo potentielle.</p>
+    <ul class="cl">
+      <li><input type="checkbox" onchange="autoSave()"><label><strong>« Urgent »</strong> / « À saisir » / « Cause déménagement immédiat »</label></li>
+      <li><input type="checkbox" onchange="autoSave()"><label><strong>« Cause succession »</strong> / « Divorce » / « Mutation »</label></li>
+      <li><input type="checkbox" onchange="autoSave()"><label><strong>« Travaux à prévoir »</strong> / « À rafraîchir » — travaux non chiffrés = levier négo</label></li>
+      <li><input type="checkbox" onchange="autoSave()"><label><strong>Aucune photo</strong> ou photos floues / peu soignées = vendeur peu investi</label></li>
+      <li><input type="checkbox" onchange="autoSave()"><label><strong>Prix incohérent</strong> vs surface et localisation — trop haut au m² vs DVF = surévalué</label></li>
+      <li><input type="checkbox" onchange="autoSave()"><label><strong>« Libre constructeur »</strong> sans viabilisation = vendeur peut être pressé</label></li>
+      <li><input type="checkbox" onchange="autoSave()"><label><strong>« Très bon potentiel »</strong> / « Rare sur le secteur »</label> — attention : peut signifier surévalué</li>
+    </ul>
+    <div style="background:#fdf8ec;border:1px solid #f0d98a;border-radius:7px;padding:8px 12px;margin-top:10px;font-size:11px;color:#7a5500">
+      ⚠️ Ces signaux orientent l'appel — mais la vraie pression vendeur se confirme à l'oral (durée exacte, offres refusées, motif). Onglet <strong>2·Appel</strong>.
+    </div>
+  </div>
+</div>
+
+<!-- T2 PRÉ-CALCUL -->
+<div id="t3" class="screen">
+  <div class="card">
+    <h3>Calcul de marge complet — 3 scénarios</h3>
+    <div class="hl">⚠️ Décision GO visite = <strong>pessimiste ≥ 20%</strong> uniquement. Réaliste + optimiste = lives LI.</div>
+    <h4 class="section">1. Coûts d'acquisition </h4>
+    <div class="r2">
+      <div>
+        <span class="lbl">Prix achat FAI (€)</span>
+        <input type="number" id="m_prix" oninput="calcMarge();autoSave()">
+        <button class="btn btn-sm" style="margin-top:5px;font-size:11px;background:#185fa5;color:#fff;border-color:#185fa5" onclick="appliquerNego()">↓ Appliquer négociation onglet 1</button>
+        <p style="font-size:10px;color:#aaa;margin-top:3px">Prix réel d'achat après négociation. Sinon = prix affiché.</p>
+      </div>
+      <div><span class="lbl">Frais de mutation / notaire (€)</span><input type="number" id="m_not" placeholder="0" oninput="calcMarge();autoSave()"><p style="font-size:10px;color:#aaa;margin-top:2px">Calculé automatiquement : Prix achat × 3%</p></div>
+    </div>
+    <div class="r2">
+      <div><span class="lbl">Géomètre + DP (€)</span><input type="number" id="m_geo" placeholder="2500" oninput="calcMarge();autoSave()"></div>
+      <div><span class="lbl">Taxe foncière prorata (€)</span><input type="number" id="m_tfon" placeholder="700" oninput="calcMarge();autoSave()"></div>
+    </div>
+    <div class="r2">
+      <div>
+        <span class="lbl">Travaux (€)</span>
+        <input type="number" id="m_trav" placeholder="0" oninput="calcMarge();autoSave()">
+        <p style="font-size:10px;color:#aaa;margin-top:3px">Stratégie sans travaux = <strong>0€</strong> ici — la décote est déjà dans le prix de revente ci-dessus.<br>Travaux possibles si validés LI et marge pessimiste ≥ 20% travaux inclus.</p>
+      </div>
+      <div>
+        <span class="lbl">Taxe d'aménagement (€) — laisser à 0</span>
+        <input type="number" id="m_tax" placeholder="0" oninput="calcMarge();autoSave()">
+        <div style="background:#f0f6ff;border:1px solid #c5d8f5;border-radius:7px;padding:8px 12px;margin-top:6px;font-size:11px;color:#1e40af;line-height:1.7">
+          <strong>ℹ️ La TA est payée par l'acheteur du lot</strong> — pas par toi au moment de la vente.<br>
+          Tu n'as donc rien à mettre ici. En revanche, applique une <strong>décote de 2 000 à 5 000 € sur ton prix de revente pessimiste du lot</strong> pour tenir compte de ce que l'acheteur devra payer en plus. Ça rend ton calcul réaliste sans fausser tes coûts.
+        </div>
+      </div>
+    </div>
+    <div class="r2">
+      <div><span class="lbl">Aléas (€) — ex: 5% du total achat</span><input type="number" id="m_alea" placeholder="11650" oninput="calcMarge();autoSave()"><p style="font-size:10px;color:#aaa;margin-top:2px">Montant en euros — ex: Prix achat × 5%</p></div>
+      <div><span class="lbl">Frais agence revente % — garder 5</span><input type="number" id="m_fagence" placeholder="5" oninput="calcMarge();autoSave()"><p style="font-size:10px;color:#aaa;margin-top:2px">Déduit automatiquement du CA</p></div>
+    </div>
+    <div class="sep"></div>
+    <h4 class="section">2. État du bien — décote travaux</h4>
+    <div class="r2" style="margin-bottom:12px">
+      <div>
+        <span class="lbl">État du bien (maison)</span>
+        <select id="m_etat" onchange="calcMarge();autoSave()">
+          <option value="0">Bon état — vendu en l'état (0%)</option>
+          <option value="0.12">Rafraîchissement simple (-15% pessimiste)</option>
+          <option value="0.20">Rénovation légère (-23% pessimiste)</option>
+        </select>
+        <p style="font-size:10px;color:#aaa;margin-top:3px">Décote appliquée automatiquement sur le prix de revente de la maison</p>
+      </div>
+      <div>
+        <span class="lbl">Check neuf local (€/m²) — optionnel</span>
+        <input type="number" id="m_neuf" placeholder="Ex: 2500 pour Vitré" oninput="checkNeuf();autoSave()">
+        <p style="font-size:10px;color:#aaa;margin-top:3px">Prix/m² neuf local — LI : revente maison doit être 15-20% sous le neuf. Calculé automatiquement selon la surface de ta maison.</p>
+        <div id="neuf_check" style="margin-top:4px;font-size:11px"></div>
+      </div>
+    </div>
+    <div style="background:#fdf8ec;border:1px solid #f0d98a;border-radius:8px;padding:10px;margin-bottom:12px">
+      <span class="lbl">💡 Prix revente maison — override manuel (€ TTC pessimiste)</span>
+      <input type="number" id="m_prix_maison_manuel" placeholder="Laisser vide = calcul DVF auto — ou entrer ton estimation réelle" oninput="calcMarge();autoSave()" style="margin-top:4px">
+      <p style="font-size:10px;color:#7a5500;margin-top:3px">Si le calcul DVF semble irréaliste (ex: maison affichée 209k ne peut pas se revendre 229k), entre ici ton estimation pessimiste réelle basée sur le marché local. Le GPS utilisera ce montant à la place du calcul automatique.</p>
+    </div>
+    <div class="sep"></div>
+    <h4 class="section">3. Lots de revente — auto-remplis depuis ton analyse marché</h4>
+    <p style="font-size:11px;color:#888;margin-bottom:8px">Pré-remplis depuis tes données DVF. Montants TTC totaux. Ajuste si besoin.</p>
+    <button class="btn btn-sm" style="background:#185fa5;color:#fff;border-color:#185fa5" onclick="autoFillLots()" style="margin-bottom:10px">↻ Recalculer depuis analyse marché</button>
+    <div id="lots_c"></div>
+    <button class="btn btn-sm" onclick="addLot()" style="margin-top:6px">+ Ajouter un lot</button>
+    <div class="sep"></div>
+    <h4 class="section">4. Résultats</h4>
+    <div class="m3" id="syn_m"></div>
+    <div id="res_d"></div>
+    <div class="sep"></div>
+    <h4 class="section">5. Prix max d'offre (pessimiste ≥ 20%)</h4>
+    <div id="px_max"></div>
+    <div class="sep"></div>
+    <div style="background:#f0f6ff;border:1px solid #c5d8f5;border-radius:8px;padding:10px;margin-bottom:10px">
+      <div style="font-size:12px;font-weight:600;color:#1e40af;margin-bottom:6px">📋 Utilisation de cet onglet en 2 temps</div>
+      <div style="font-size:11px;color:#1e40af;line-height:1.7">
+        <strong>Avant visite :</strong> remplis avec les données annonce → GO visite si pessimiste ≥ 20%<br>
+        <strong>Après visite :</strong> reviens ici, affine avec les vraies infos (état réel, taxe foncière, prix négocié) → décision GO/STOP définitif
+      </div>
+      <div style="margin-top:8px;display:flex;align-items:center;gap:8px">
+        <input type="checkbox" id="marge_post_visite" onchange="autoSave()">
+        <label for="marge_post_visite" style="font-size:12px;font-weight:600;color:#1e40af">✅ Marge mise à jour après visite</label>
+      </div>
+    </div>
+    <h4 class="section">6. Checklist GO Lives LI</h4>
+    <p style="font-size:11px;color:#888;margin-bottom:10px">Tout coché → tu passes aux Lives LI (onglet <strong>6·Lives</strong>). Google Forms LI = dans l'onglet <strong>6·Lives</strong>.</p>
+    <ul class="cl">
+      <li><input type="checkbox"><label>Marge pessimiste ≥ 20% confirmée</label></li>
+      <li><input type="checkbox"><label>Prix revente validés — DVF + Castorus + MeilleursAgents</label></li>
+      <li><input type="checkbox"><label>PLU zone U confirmé</label></li>
+      <li><input type="checkbox"><label>Aléas budgétés (5 à 10% minimum)</label></li>
+      <li><input type="checkbox"><label>En vente +6 mois OU situation vendeur favorable</label></li>
+      <li><input type="checkbox"><label>Visite physique réalisée</label></li>
+      <li><input type="checkbox"><label>Marge mise à jour après visite ← cocher ci-dessus</label></li>
+    </ul>
+  </div>
+</div>
+
+<!-- T4 APPEL AGENT -->
+<div id="t4" class="screen">
+
+  <!-- AVANT D'APPELER -->
+  <div class="card">
+    <h3>Avant d'appeler</h3>
+    <ul class="cl">
+      <li><input type="checkbox"><label>Pré-calcul ≥ 20% validé onglet 1</label></li>
+      <li><input type="checkbox"><label>Annonce ouverte devant moi</label></li>
+      <li><input type="checkbox"><label>Prêt à noter dans les champs ci-dessous</label></li>
+    </ul>
+  </div>
+
+  <!-- SCRIPT + RÉPONSES SUR UNE SEULE PAGE -->
+  <div class="card">
+    <h3>Script appel</h3>
+    <div class="sb">"Bonjour, Cédric Buard, marchand de biens — j'achète comptant, financement garanti, je ne touche pas à vos honoraires. Je cherche des maisons avec grand terrain sur votre secteur. Vous avez quelque chose, même pas encore en ligne ?"</div>
+    <div class="r2" style="margin-top:10px;gap:8px">
+      <div>
+        <h4 class="section">Si oui :</h4>
+        <div class="sb" style="margin-top:5px">"Parfait. Vous pouvez m'envoyer les informations par mail ou SMS ? Je regarde et si ça correspond je reviens vers vous rapidement pour organiser une visite."</div>
+      </div>
+      <div>
+        <h4 class="section">Si non :</h4>
+        <div class="sb" style="margin-top:5px">"Pas de souci. Je vous laisse mes coordonnées — si quelque chose arrive, même avant mise en ligne, je suis preneur. SMS dans la foulée."</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUESTIONS + CHAMPS RÉPONSES INTÉGRÉS -->
+  <div class="card">
+    <h3>Questions + réponses pendant l'appel</h3>
+    <p style="font-size:11px;color:#888;margin-bottom:12px">Note les réponses directement ici — tout est sauvegardé automatiquement.</p>
+
+    <div style="margin-bottom:10px">
+      <div style="font-size:13px;font-weight:500;margin-bottom:4px">Adresse reçue par mail/SMS <span style="font-size:11px;font-weight:400;color:#888">— noter ici après réception du dossier</span></div>
+      <input type="text" id="f_adresse" placeholder="12 rue des Lilas, Vitré" oninput="autoSave()" style="margin-top:0">
+      <div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div style="background:#edf7f1;border:1px solid #b6dfc8;border-radius:7px;padding:10px">
+          <div style="font-size:11px;font-weight:600;color:#1a5c3a;margin-bottom:5px">✅ PLU Zone U → Confirmer visite</div>
+          <div class="sb" style="font-size:11px;padding:8px">"J'ai regardé le bien, ça m'intéresse. On peut se voir rapidement pour une visite ?"</div>
+        </div>
+        <div style="background:#fdf0f0;border:1px solid #f0b8b8;border-radius:7px;padding:10px">
+          <div style="font-size:11px;font-weight:600;color:#8b2020;margin-bottom:5px">❌ PLU Zone A/N → Annuler poliment</div>
+          <div class="sb" style="font-size:11px;padding:8px">"J'ai étudié le dossier, ce bien ne correspond pas à mes critères actuels. Je reste preneur si vous avez autre chose avec un grand terrain sur le secteur."</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:10px">
+      <div style="font-size:13px;font-weight:500;margin-bottom:4px">"Depuis combien de temps exactement en vente ?"</div>
+      <input type="text" id="f_duree" placeholder="Ex: 7 mois" oninput="autoSave()" style="margin-top:0">
+    </div>
+
+    <div style="margin-bottom:10px">
+      <div style="font-size:13px;font-weight:500;margin-bottom:4px">"Pourquoi les vendeurs vendent ?"</div>
+      <input type="text" id="f_motif" placeholder="Ex: retraite, succession, divorce..." oninput="autoSave()" style="margin-top:0">
+    </div>
+
+    <div style="margin-bottom:10px">
+      <div style="font-size:13px;font-weight:500;margin-bottom:4px">"Il y a des contraintes particulières sur le terrain ?"</div>
+      <input type="text" id="f_contraintes" placeholder="Ex: aucune, servitude, PLU..." oninput="autoSave()" style="margin-top:0">
+    </div>
+
+    <div class="r2" style="gap:10px;margin-bottom:10px">
+      <div>
+        <div style="font-size:13px;font-weight:500;margin-bottom:4px">"Quel est le montant de la taxe foncière ?"</div>
+        <input type="text" id="f_taxe_fonc" placeholder="Ex: 1 400€" oninput="autoSave()" style="margin-top:0">
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:500;margin-bottom:4px">"Y a-t-il des travaux importants ?"</div>
+        <input type="text" id="f_travaux_detail" placeholder="Ex: rafraîchissement léger" oninput="autoSave()" style="margin-top:0">
+      </div>
+    </div>
+
+    <div class="r2" style="gap:10px;margin-bottom:10px">
+      <div>
+        <div style="font-size:13px;font-weight:500;margin-bottom:4px">"Les compteurs eau/élec sont séparés ?"</div>
+        <input type="text" id="f_compteurs" placeholder="Ex: oui / non" oninput="autoSave()" style="margin-top:0">
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:500;margin-bottom:4px">"Raccordé tout-à-l'égout ou fosse ?"</div>
+        <input type="text" id="f_assainis" placeholder="Ex: tout-à-l'égout" oninput="autoSave();checkSPANC()" style="margin-top:0">
+        <div id="spanc_alert" style="display:none;margin-top:6px;padding:8px 12px;background:#fef3c7;border:1px solid #f59e0b;border-radius:6px;font-size:11px;color:#92400e">⚠️ <strong>Fosse septique détectée</strong> — Vérifier conformité SPANC. Si non conforme : 5 000 à 15 000 € de mise aux normes. Intégrer dans calcul marge onglet 4.</div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:10px">
+      <div style="font-size:13px;font-weight:500;margin-bottom:4px">Notes libres appel</div>
+      <textarea id="f_notes_appel" rows="2" placeholder="Autres infos, impression générale, à relancer..." oninput="autoSave()" style="resize:vertical;margin-top:0"></textarea>
+    </div>
+  </div>
+
+  <!-- SMS -->
+  <div class="card">
+    <h3>SMS à envoyer immédiatement après l'appel</h3>
+    <div style="background:#f8f7f4;padding:14px;border-radius:9px">
+      <div class="sms" id="sms_content">Suite à notre échange,
+
+Je confirme ma recherche : maison avec grand terrain, achat comptant, financement garanti.
+Je présente toujours mes offres en direct avec vous et les vendeurs — pas de surprise, pas d'offre par mail.
+Vos honoraires sont préservés.
+
+Si quelque chose se présente — même avant mise en ligne — je suis disponible rapidement.
+
+Cédric Buard — Marchand de biens
+07 88 81 27 14</div>
+    </div>
+    <div style="margin-top:8px;display:flex;align-items:center;gap:10px">
+      <button class="btn btn-sm" style="background:#185fa5;color:#fff;border-color:#185fa5" onclick="copierSMS()">📋 Copier le SMS</button>
+      <span id="sms_copied" style="font-size:12px;color:#166534;display:none">✓ Copié !</span>
+    </div>
+    <div class="sep"></div>
+    <ul class="cl">
+      <li><input type="checkbox"><label>SMS envoyé</label></li>
+      <li><input type="checkbox"><label>Agent enregistré dans Notion Réseau &amp; Partenaires avec date</label></li>
+      <li><input type="checkbox"><label>Relance planifiée dans 1 mois — entretien réseau</label></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>🎯 Posture pro face à l'agent</h3>
+    <p style="font-size:11px;color:#888;margin-bottom:10px">Un agent te teste dès la 1ère minute. Il scanne ton niveau, ta posture, ta cohérence. Objectif : être identifié comme opérateur pro — pas comme touriste de l'immobilier.</p>
+
+    <h4 class="section">❌ Erreurs qui te disqualifient immédiatement</h4>
+    <div style="background:#fdf0f0;border:1px solid #f0b8b8;border-radius:8px;padding:10px;font-size:12px;color:#8b2020;margin-bottom:12px;line-height:1.8">
+      ❌ Dire "Est-ce que le prix est négociable ?" dès le premier appel<br>
+      ❌ Parler de ton budget personnel ou de ta situation<br>
+      ❌ Dire "Je vais réfléchir et je vous rappelle" — montre de l'hésitation<br>
+      ❌ Découvrir le bien pendant l'appel ou la visite — prépare avant<br>
+      ❌ Poser des questions hors sujet (charges, syndic, loyer actuel si non pertinent)
+    </div>
+
+    <h4 class="section">✅ Les 5 réflexes d'opérateur pro</h4>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="background:#f0faf4;border:1px solid #b6dfc8;border-radius:7px;padding:9px 12px;font-size:12px">
+        <strong style="color:#1a5c3a">1. Présente-toi comme acquéreur pro dès le départ</strong><br>
+        <span style="color:#666">"Je suis marchand de biens, j'opère sur ce secteur — achat comptant, financement garanti."</span>
+      </div>
+      <div style="background:#f0faf4;border:1px solid #b6dfc8;border-radius:7px;padding:9px 12px;font-size:12px">
+        <strong style="color:#1a5c3a">2. Annonce ton objectif clairement</strong><br>
+        <span style="color:#666">"Je cible des biens avec grand terrain à valoriser pour revente rapide."</span>
+      </div>
+      <div style="background:#f0faf4;border:1px solid #b6dfc8;border-radius:7px;padding:9px 12px;font-size:12px">
+        <strong style="color:#1a5c3a">3. Parle projet, pas émotion</strong><br>
+        <span style="color:#666">"Je veux vérifier si ce bien peut rentrer dans mes critères d'opération."</span>
+      </div>
+      <div style="background:#f0faf4;border:1px solid #b6dfc8;border-radius:7px;padding:9px 12px;font-size:12px">
+        <strong style="color:#1a5c3a">4. Utilise un langage orienté cadre</strong><br>
+        <span style="color:#666">"Je fonctionne sans clause suspensive de prêt, avec des délais courts — je ne touche pas à vos honoraires."</span>
+      </div>
+      <div style="background:#f0faf4;border:1px solid #b6dfc8;border-radius:7px;padding:9px 12px;font-size:12px">
+        <strong style="color:#1a5c3a">5. Crée la relation sans dévoiler ta stratégie</strong><br>
+        <span style="color:#666">Tu ne mentionnes jamais la division, ni Link Invests. Tu restes "marchand de biens local".</span>
+      </div>
+    </div>
+
+    <div style="margin-top:14px;background:#f0f4ff;border:1px solid #bfcfff;border-radius:9px;padding:12px">
+      <div style="font-size:12px;font-weight:600;color:#1a3a6b;margin-bottom:8px">💬 Phrase de présentation type — parler au nom d'un collectif (NT1 LI)</div>
+      <div style="background:#fff;border:1px solid #bfcfff;border-radius:7px;padding:10px 12px;font-size:12px;color:#444;font-style:italic;margin-bottom:6px">
+        "Je suis en mission de sourcing pour une structure spécialisée dans la division et revente de biens immobiliers. Nous analysons les biens au regard du PLU, des accès, et des possibilités techniques. Quand un bien correspond, nous sommes capables de faire une offre ferme rapidement."
+      </div>
+      <div style="font-size:11px;color:#1a3a6b">⚡ Toujours parler au nom d'un collectif ("nous") — jamais seul = plus rassurant, plus crédible.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>📞 Déroulé type — appel vendeur direct (NT10 LI)</h3>
+    <p style="font-size:11px;color:#888;margin-bottom:12px">Objectif de l'appel : cadrer, pas conclure. Valider les infos + évaluer la posture + présenter ton profil + amorcer l'offre.</p>
+
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
+      <div style="background:#f0faf4;border:1px solid #b6dfc8;border-radius:7px;padding:9px 12px;font-size:12px">
+        <strong style="color:#1a5c3a">1. Introduction claire</strong><br>
+        <span style="color:#666">"Bonjour, ici Cédric, je vous appelle pour le bien situé au [adresse]. Je suis opérateur immobilier sur le secteur."</span>
+      </div>
+      <div style="background:#f0faf4;border:1px solid #b6dfc8;border-radius:7px;padding:9px 12px;font-size:12px">
+        <strong style="color:#1a5c3a">2. Validation des infos clés</strong><br>
+        <span style="color:#666">"Le bien est toujours disponible ? Quelle est la surface du terrain exactement ?"</span>
+      </div>
+      <div style="background:#f0faf4;border:1px solid #b6dfc8;border-radius:7px;padding:9px 12px;font-size:12px">
+        <strong style="color:#1a5c3a">3. Cadre de l'échange</strong><br>
+        <span style="color:#666">"Je travaille sur des opérations rapides. Je fonctionne sans prêt, sans conditions suspensives."</span>
+      </div>
+      <div style="background:#f0faf4;border:1px solid #b6dfc8;border-radius:7px;padding:9px 12px;font-size:12px">
+        <strong style="color:#1a5c3a">4. Poser une ouverture</strong><br>
+        <span style="color:#666">"Si vous êtes ouvert à la discussion, je peux vous faire une proposition sérieuse sous 24h."</span>
+      </div>
+    </div>
+
+    <div style="background:#f8f7f4;border:1px solid #e8e6e0;border-radius:8px;padding:10px 12px;font-size:12px">
+      <div style="font-weight:600;margin-bottom:8px;color:#1a3a6b">📋 Grille d'autoévaluation après chaque appel</div>
+      <div style="display:flex;flex-direction:column;gap:5px">
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;padding:5px 8px;background:#fff;border-radius:5px;border:1px solid #e8e6e0">
+          <span><strong>Accroche claire</strong> — j'ai posé le cadre dès la 1ère minute ?</span>
+          <span style="color:#888">__ /5</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;padding:5px 8px;background:#fff;border-radius:5px;border:1px solid #e8e6e0">
+          <span><strong>Posture pro</strong> — j'ai parlé avec autorité et calme ?</span>
+          <span style="color:#888">__ /5</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;padding:5px 8px;background:#fff;border-radius:5px;border:1px solid #e8e6e0">
+          <span><strong>Écoute active</strong> — j'ai laissé parler sans couper ?</span>
+          <span style="color:#888">__ /5</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;padding:5px 8px;background:#fff;border-radius:5px;border:1px solid #e8e6e0">
+          <span><strong>Argumentaire fluide</strong> — j'ai présenté mon offre avec logique ?</span>
+          <span style="color:#888">__ /5</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;padding:5px 8px;background:#fff;border-radius:5px;border:1px solid #e8e6e0">
+          <span><strong>Conclusion cadrée</strong> — j'ai fermé avec une prochaine étape ?</span>
+          <span style="color:#888">__ /5</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- T5 PLU + VISITE -->
+<div id="t5" class="screen">
+
+  <div class="card">
+    <h3>Vérification PLU — avant toute visite</h3>
+    <p style="font-size:11px;color:#888;margin-bottom:12px">Tu as l'adresse depuis l'onglet appel agent. Fais ça avant de te déplacer — les agents ne savent souvent pas si le terrain est divisible.</p>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+      <a href="https://www.castorus.com/" target="_blank" class="btn-lien">Castorus →</a>
+      <span style="font-size:11px;color:#888">Historique prix et durée en vente — signal de négociation direct.</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <a href="https://www.geoportail-urbanisme.gouv.fr" target="_blank" class="btn-lien bleu">Géoportail Urbanisme →</a>
+        <span style="font-size:11px;color:#888">Vérifier la zone PLU de la parcelle — zone U/A/N/AU. C'est ici que tu confirmes si le terrain est constructible.</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <a href="https://www.geoportail.gouv.fr" target="_blank" class="btn-lien gris">Géoportail Cadastre →</a>
+        <span style="font-size:11px;color:#888">Voir les limites exactes de la parcelle et simuler la division. Couche "Parcelles cadastrales".</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <a href="https://app.dvf.etalab.gouv.fr/" target="_blank" class="btn-lien gris">DVF Étalab parcelle →</a>
+        <span style="font-size:11px;color:#888">Prix de vente des parcelles voisines — valider le DVF terrain de ta zone.</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <a href="https://www.georisques.gouv.fr/" target="_blank" class="btn-lien gris">Géorisques →</a>
+        <span style="font-size:11px;color:#888">Vérifier risques naturels : argile (fissures), inondation, retrait gonflement. Un terrain en zone de risque fort = valeur impactée.</span>
+      </div>
+    </div>
+
+    <ul class="cl">
+      <li>
+        <input type="checkbox">
+        <div>
+          <div style="font-size:13px;font-weight:500">Taper l'adresse exacte obtenue lors de l'appel</div>
+          
+        </div>
+      </li>
+      <li>
+        <input type="checkbox">
+        <div>
+          <div style="font-size:13px;font-weight:500">Activer "Documents d'urbanisme" → PLU</div>
+          <div style="font-size:11px;color:#888;margin-top:2px">Dans le menu "Cartes" à gauche → "Urbanisme" → cocher "Documents d'urbanisme". La carte se colore par zones.</div>
+        </div>
+      </li>
+      <li>
+        <input type="checkbox">
+        <div>
+          <div style="font-size:13px;font-weight:500">Identifier la zone de la parcelle</div>
+          <div style="font-size:11px;color:#888;margin-top:2px">Clique sur la parcelle → une fiche s'affiche avec la zone. Zone U = constructible ✅ / Zone A ou N = stop ❌</div>
+        </div>
+      </li>
+      <li>
+        <input type="checkbox">
+        <div>
+          <div style="font-size:13px;font-weight:500">Vérifier emplacements réservés (ER) sur la parcelle</div>
+          <div style="font-size:11px;color:#888;margin-top:2px">Un ER = la commune peut racheter le terrain pour un projet public (route, école...). Si ER sur ta parcelle = risque fort, à éviter.</div>
+        </div>
+      </li>
+      <li>
+        <input type="checkbox">
+        <div>
+          <div style="font-size:13px;font-weight:500">Vérifier règlement de zone : superficie min de lot / reculs obligatoires</div>
+          <div style="font-size:11px;color:#888;margin-top:2px">Le PLU peut imposer un lot minimum (ex: 400 m²) ou un recul de 3 m par rapport aux voisins. Si ton lot divisé est trop petit = division impossible.</div>
+        </div>
+      </li>
+      <li>
+        <input type="checkbox">
+        <div>
+          <div style="font-size:13px;font-weight:500">Vérifier les reculs imposés en zone U</div>
+          <div style="font-size:11px;color:#888;margin-top:2px">Dans le règlement PLU → articles "implantation par rapport aux voies" (recul rue, ex: 5m) et "implantation par rapport aux limites séparatives" (recul voisins, ex: 3m). Vérifie que le lot nu reste constructible malgré ces reculs. Tu ne mesures pas toi-même — c'est le géomètre. Toi tu vérifies la faisabilité avant de te déplacer.</div>
+        </div>
+      </li>
+      <li>
+        <input type="checkbox">
+        <div>
+          <div style="font-size:13px;font-weight:500">Consulter le cadastre pour projections de plans</div>
+          <div style="font-size:11px;color:#888;margin-top:2px">Sur geoportail.gouv.fr → couche "Parcelles cadastrales". Tu vois les limites exactes de la parcelle pour simuler ta division.</div>
+        </div>
+      </li>
+    </ul>
+
+    <div class="sep"></div>
+    <span class="lbl">Zone identifiée — sélectionner pour voir la décision</span>
+    <select id="z_plu" onchange="showPlu()">
+      <option value="">-- sélectionner --</option>
+      <option value="U">Zone U (UA / UB / UC / UH...) — constructible</option>
+      <option value="A">Zone A — agricole</option>
+      <option value="N">Zone N — naturelle</option>
+      <option value="AU">Zone AU — à urbaniser</option>
+    </select>
+    <div id="plu_r" style="margin-top:10px"></div>
+  </div>
+
+  <div class="card">
+    <h3>Checklist visite terrain</h3>
+    <p style="font-size:11px;color:#aaa;margin-bottom:10px">Uniquement si PLU zone U ✅ + marge pessimiste ≥ 20% ✅</p>
+
+    <h4 class="section">Avec l'agent / le vendeur</h4>
+    <ul class="cl">
+      <li>
+        <input type="checkbox">
+        <div style="width:100%">
+          <div style="font-size:13px;font-weight:500">Marge de négociation ?</div>
+          <div style="font-size:11px;color:#888;margin-top:2px">"Le vendeur est-il ouvert à négocier ?" — ne pas dire un chiffre, laisser l'agent parler en premier.</div>
+          <input type="text" id="v_nego" placeholder="Réponse agent..." oninput="autoSave()" style="margin-top:5px;font-size:12px">
+        </div>
+      </li>
+      <li>
+        <input type="checkbox">
+        <div style="width:100%">
+          <div style="font-size:13px;font-weight:500">Offres déjà reçues — quand et à quel prix ?</div>
+          <div style="font-size:11px;color:#888;margin-top:2px">Si offres refusées = vendeur a un prix en tête. Information clé pour calibrer ton offre.</div>
+          <input type="text" id="v_offres" placeholder="Ex: offre à 240k refusée il y a 2 mois..." oninput="autoSave()" style="margin-top:5px;font-size:12px">
+        </div>
+      </li>
+      <li>
+        <input type="checkbox">
+        <div>
+          <div style="font-size:13px;font-weight:500">Cadrage MDB — expliquer ton fonctionnement sans mentionner LI</div>
+          <div style="font-size:11px;color:#888;margin-top:2px">Tu dis : "Je suis marchand de biens, j'achète comptant, je règle rapidement, je présente mon offre en direct avec vous." Tu ne parles jamais de Link Invests ni de division de terrain.</div>
+        </div>
+      </li>
+      <li>
+        <input type="checkbox">
+        <div>
+          <div style="font-size:13px;font-weight:500">Créer un lien avec l'agent et le vendeur</div>
+          <div style="font-size:11px;color:#888;margin-top:2px">Trouver un point commun, un sujet neutre. Plus tu es humain, plus ils acceptent une offre basse.</div>
+        </div>
+      </li>
+      <li>
+        <input type="checkbox">
+        <div style="width:100%">
+          <div style="font-size:13px;font-weight:500">Coordonnées complètes des vendeurs</div>
+          <div style="font-size:11px;color:#888;margin-top:2px">Nom, prénom, adresse, téléphone de chaque vendeur. Obligatoire pour l'offre d'achat FE-MDB-008.</div>
+          <input type="text" id="v_coords" placeholder="Nom Prénom — 06 xx xx xx xx..." oninput="autoSave()" style="margin-top:5px;font-size:12px">
+        </div>
+      </li>
+    </ul>
+
+    <div style="margin-top:14px;background:#f5f0ff;border:1px solid #c4b5fd;border-radius:9px;padding:12px">
+      <div style="font-size:12px;font-weight:600;color:#4c1d95;margin-bottom:10px">🧠 Profil psychologique vendeur — adapter le discours (NT7 LI)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">
+        <div style="background:#fff;border:1px solid #c4b5fd;border-radius:7px;padding:9px 10px;font-size:11px">
+          <strong style="color:#4c1d95">Rationnel</strong><br>
+          <span style="color:#166534">✅ Parler chiffres, planning, clarté</span><br>
+          <span style="color:#8b2020">❌ Small talk inutile</span>
+        </div>
+        <div style="background:#fff;border:1px solid #c4b5fd;border-radius:7px;padding:9px 10px;font-size:11px">
+          <strong style="color:#4c1d95">Affectif</strong><br>
+          <span style="color:#166534">✅ Valoriser le bien, montrer du respect</span><br>
+          <span style="color:#8b2020">❌ Être trop direct ou technique</span>
+        </div>
+        <div style="background:#fff;border:1px solid #c4b5fd;border-radius:7px;padding:9px 10px;font-size:11px">
+          <strong style="color:#4c1d95">Pressé</strong><br>
+          <span style="color:#166534">✅ Proposer sortie rapide, sécurisante</span><br>
+          <span style="color:#8b2020">❌ Poser trop de conditions</span>
+        </div>
+      </div>
+      <div style="font-size:11px;color:#4c1d95;margin-bottom:6px;font-weight:600">Questions clés à poser pendant la visite :</div>
+      <div style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:#444">
+        <div style="background:#fff;border:1px solid #c4b5fd;border-radius:5px;padding:6px 10px">💬 "Depuis combien de temps il est en vente ?"</div>
+        <div style="background:#fff;border:1px solid #c4b5fd;border-radius:5px;padding:6px 10px">💬 "Pourquoi vous vendez aujourd'hui ?"</div>
+        <div style="background:#fff;border:1px solid #c4b5fd;border-radius:5px;padding:6px 10px">💬 "Vous avez déjà eu des offres ?"</div>
+        <div style="background:#fff;border:1px solid #c4b5fd;border-radius:5px;padding:6px 10px">💬 "Quel est votre timing idéal pour signer ?"</div>
+      </div>
+      <div style="font-size:11px;color:#7a5500;background:#fdf8ec;border:1px solid #f0d98a;border-radius:6px;padding:7px 10px;margin-top:8px">
+        ⚠️ Comprendre "pourquoi il vend" est plus puissant que négocier 5k de moins. Le vendeur veut le prix + le cadre + la sécurité — pas que le prix.
+      </div>
+      <span class="lbl" style="margin-top:10px">Profil détecté + motivation réelle</span>
+      <input type="text" id="v_profil_vendeur" placeholder="Ex: affectif — maison familiale — veut signer avant l'été..." oninput="autoSave()" style="font-size:12px">
+    </div>
+
+    <h4 class="section">Sur place — points à vérifier</h4>
+    <ul class="cl">
+      <li>
+        <input type="checkbox">
+        <div style="width:100%">
+          <div style="font-size:13px;font-weight:500">Environnement — nuisances / ligne HT / activité industrielle</div>
+          <div style="font-size:11px;color:#888;margin-top:2px">Route passante, pylône électrique, usine, cimetière... Ça impacte le prix de revente du lot nu.</div>
+          <input type="text" id="v_enviro" placeholder="Ex: calme, pas de nuisance visible..." oninput="autoSave()" style="margin-top:5px;font-size:12px">
+        </div>
+      </li>
+      <li>
+        <input type="checkbox">
+        <div style="width:100%">
+          <div style="font-size:13px;font-weight:500">État bâti — rafraîchissement léger OK / travaux structurels = STOP</div>
+          <div style="font-size:11px;color:#888;margin-top:2px">Peinture, sols, cuisine vétuste = OK. Toiture effondrée, murs porteurs fissurés, amiante = STOP immédiat.</div>
+          <input type="text" id="v_bati" placeholder="Ex: peinture à refaire, cuisine vétuste, toiture OK..." oninput="autoSave()" style="margin-top:5px;font-size:12px">
+        </div>
+      </li>
+      <li>
+        <input type="checkbox">
+        <div style="width:100%">
+          <div style="font-size:13px;font-weight:500">Sol et terrain — pente forte / zone humide / argile visible</div>
+          <div style="font-size:11px;color:#888;margin-top:2px">Pente forte = fondations plus coûteuses pour le constructeur = lot moins valorisé. Zone humide ou argile visible = risque retrait-gonflement = à vérifier sur Géorisques. Un terrain plat et sec = idéal.</div>
+          <input type="text" id="v_sol" placeholder="Ex: terrain plat, sol sec / légère pente, à vérifier Géorisques..." oninput="autoSave()" style="margin-top:5px;font-size:12px">
+        </div>
+      </li>
+      <li>
+        <input type="checkbox">
+        <div style="width:100%">
+          <div style="font-size:13px;font-weight:500">Assainissement — tout-à-l'égout ou fosse septique</div>
+          <div style="font-size:11px;color:#888;margin-top:2px">Tout-à-l'égout = idéal. Fosse septique = vérifier conformité SPANC (5 000 à 15 000 € si non conforme — intégrer dans marge).</div>
+          <input type="text" id="v_assainis" placeholder="Ex: tout-à-l'égout / fosse conforme / fosse à remplacer..." oninput="autoSave()" style="margin-top:5px;font-size:12px">
+        </div>
+      </li>
+      <li>
+        <input type="checkbox">
+        <div>
+          <div style="font-size:13px;font-weight:500">Croquis de division esquissé sur place — Lot A + Lot B + surfaces</div>
+          <div style="font-size:11px;color:#888;margin-top:2px">Fais un schéma rapide à la main. Lot A = maison + x m². Lot B = terrain nu y m². Vérifie que chaque lot ≥ superficie min PLU.</div>
+        </div>
+      </li>
+      <li>
+        <input type="checkbox">
+        <div style="width:100%">
+          <div style="font-size:13px;font-weight:500">Accès voirie indépendant pour le lot nu</div>
+          <div style="font-size:11px;color:#888;margin-top:2px">Le lot nu doit toucher directement la rue sans passer par le terrain de la maison. Si enclavé = servitude de passage à prévoir ou STOP.</div>
+          <input type="text" id="v_voirie" placeholder="Ex: accès direct rue OK / enclavé — servitude possible..." oninput="autoSave()" style="margin-top:5px;font-size:12px">
+        </div>
+      </li>
+    </ul>
+
+    <h4 class="section">Après la visite — obligatoire</h4>
+    <ul class="cl">
+      <li>
+        <input type="checkbox">
+        <div>
+          <div style="font-size:13px;font-weight:500">Calcul marge 3 scénarios — onglet 4·Marge</div>
+          <div style="font-size:11px;color:#888;margin-top:2px">Revenir sur onglet 4·Marge et affiner avec les vraies infos de la visite. Pessimiste / réaliste / optimiste. Décision GO uniquement sur le pessimiste ≥ 20%.</div>
+        </div>
+      </li>
+
+
+      <li>
+        <input type="checkbox">
+        <div>
+          <div style="font-size:13px;font-weight:500">Demander les diagnostics techniques au vendeur</div>
+          <div style="font-size:11px;color:#888;margin-top:2px">DPE, amiante, plomb, électricité... S'ils existent déjà, ils te font gagner du temps pour le dossier LI.</div>
+        </div>
+      </li>
+
+
+
+      <li>
+        <input type="checkbox">
+        <div>
+          <div style="font-size:13px;font-weight:500">Contacter service urbanisme mairie — accord de principe</div>
+          <div style="font-size:11px;color:#888;margin-top:2px">Appelle ou déplace-toi au service urbanisme avant de faire ton offre. Se présenter comme <strong>opérateur local structuré</strong> (pas simple particulier). Ne jamais parler de marge. Demander une <strong>trace écrite</strong> — ne jamais se fier à un avis oral seul.</div>
+          <div style="margin-top:8px;padding:10px 12px;background:#f0f9f4;border:1px solid #86efac;border-radius:7px;font-size:11px;color:#166534">
+            <strong>✅ Règle DP/PA (FT-MDB-027 LI) :</strong> Si la maison existante est conservée → ce n'est PAS un lotissement → <strong>pas de DP ni PA obligatoire</strong> → juste division cadastrale par géomètre. DP requis seulement si création de voirie ou espaces communs nouveaux.
+          </div>
+          <div style="margin-top:8px;padding:10px 12px;background:#fafaf9;border:1px solid #e5e4de;border-radius:7px;font-size:11px;color:#444">
+            <strong>Questions à poser en mairie :</strong><br>
+            • La zone PLU est-elle figée ou révision en cours ?<br>
+            • Y a-t-il des servitudes spécifiques sur cette parcelle ?<br>
+            • Taxe d'aménagement — quel est le taux communal ?<br>
+            • Faut-il un DP ou PA pour mon projet (division + maison conservée) ?<br>
+            • Projets municipaux à proximité (routes, ZAC) ?
+          </div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+</div>
+
+<!-- T6 DOSSIER DRIVE -->
+<div id="t6" class="screen">
+
+  <div class="card">
+    <h3>Pièces à conserver — dossier Drive</h3>
+    <p style="font-size:11px;color:#888;margin-bottom:12px">Crée un dossier Drive par bien : <strong>[Adresse] — [Prix] — [Date]</strong>. Chaque pièce cochée = uploadée dans ce dossier.</p>
+
+    <ul class="cl">
+      <li>
+        <input type="checkbox">
+        <div>
+          <div style="font-size:13px;font-weight:500">Références DVF parcelles voisines</div>
+          <div style="font-size:11px;color:#888;margin-top:2px">Captures app.dvf.etalab.gouv.fr — prix de vente des terrains à bâtir vendus dans la commune ces 24 mois. LI te demande systématiquement au Live 2 pour valider tes prix de revente terrain.</div>
+        </div>
+      </li>
+      <li>
+        <input type="checkbox">
+        <div>
+          <div style="font-size:13px;font-weight:500">Tableau Excel calcul de marge</div>
+          <div style="font-size:11px;color:#888;margin-top:2px">Le tableau LI complété avec tes 3 scénarios. Obligatoire pour le comité.</div>
+          <input type="text" id="f_lien_excel" placeholder="Lien Google Drive du tableau..." oninput="autoSave()" style="font-size:11px;margin-top:4px">
+        </div>
+      </li>
+      <li>
+        <input type="checkbox">
+        <div>
+          <div style="font-size:13px;font-weight:500">Lien annonce + screenshot archivé</div>
+          <div style="font-size:11px;color:#888;margin-top:2px">L'annonce peut disparaître — fais une capture d'écran complète dès que tu la trouves.</div>
+        </div>
+      </li>
+      <li>
+        <input type="checkbox">
+        <div>
+          <div style="font-size:13px;font-weight:500">PLU + OAP de la commune</div>
+          <div style="font-size:11px;color:#888;margin-top:2px">PLU = règles d'urbanisme de la commune (téléchargé une fois par commune, pas à chaque bien). OAP = Orientations d'Aménagement et de Programmation — contraintes spécifiques sur certaines zones (accès, orientation, espaces verts). À vérifier si ta parcelle est en zone AU ou secteur OAP.</div>
+        </div>
+      </li>
+      <li>
+        <input type="checkbox">
+        <div>
+          <div style="font-size:13px;font-weight:500">Carte de zonage de la parcelle</div>
+          <div style="font-size:11px;color:#888;margin-top:2px">Capture d'écran Géoportail Urbanisme avec la zone U visible sur ta parcelle.</div>
+        </div>
+      </li>
+      <li>
+        <input type="checkbox">
+        <div>
+          <div style="font-size:13px;font-weight:500">Plan cadastral</div>
+          <div style="font-size:11px;color:#888;margin-top:2px">Capture depuis Géoportail — couche "Parcelles cadastrales". Montre les limites exactes de ta parcelle.</div>
+        </div>
+      </li>
+      <li>
+        <input type="checkbox">
+        <div>
+          <div style="font-size:13px;font-weight:500">Capture Géoportail avant division</div>
+          <div style="font-size:11px;color:#888;margin-top:2px">Vue satellite avec la parcelle actuelle — avant toute modification.</div>
+        </div>
+      </li>
+      <li>
+        <input type="checkbox">
+        <div>
+          <div style="font-size:13px;font-weight:500">Projet de division schématisé</div>
+          <div style="font-size:11px;color:#888;margin-top:2px">Ton croquis de division : Lot A (maison + x m²) et Lot B (terrain nu y m²). Fait à la main ou sur Géoportail. LI veut voir que tu as réfléchi à la faisabilité.</div>
+        </div>
+      </li>
+      <li>
+        <input type="checkbox">
+        <div>
+          <div style="font-size:13px;font-weight:500">Photos du bien — façade / terrain / accès</div>
+          <div style="font-size:11px;color:#888;margin-top:2px">Prises lors de la visite. LI veut voir l'état réel du bien et la configuration du terrain.</div>
+        </div>
+      </li>
+      <li>
+        <input type="checkbox">
+        <div>
+          <div style="font-size:13px;font-weight:500">DPE (Diagnostic de Performance Énergétique)</div>
+          <div style="font-size:11px;color:#888;margin-top:2px">Demandé au vendeur / agent. Si indisponible, le noter — LI comprend.</div>
+        </div>
+      </li>
+      <li>
+        <input type="checkbox">
+        <div>
+          <div style="font-size:13px;font-weight:500">Diagnostics techniques</div>
+          <div style="font-size:11px;color:#888;margin-top:2px">Amiante, plomb, électricité, assainissement. Demandés au vendeur. S'ils n'existent pas encore, le noter.</div>
+        </div>
+      </li>
+      <li>
+        <input type="checkbox">
+        <div>
+          <div style="font-size:13px;font-weight:500">Compte-rendu service urbanisme mairie</div>
+          <div style="font-size:11px;color:#888;margin-top:2px">Notes de ton appel ou RDV mairie : accord de principe, conditions, assainissement. Même informel.</div>
+        </div>
+      </li>
+      <li>
+        <input type="checkbox">
+        <div>
+          <div style="font-size:13px;font-weight:500">Coordonnées complètes vendeur(s)</div>
+          <div style="font-size:11px;color:#888;margin-top:2px">Nom, prénom, adresse de chaque vendeur. Obligatoire pour remplir l'offre d'achat FE-MDB-008.</div>
+        </div>
+      </li>
+    </ul>
+
+    <div class="sep"></div>
+    <span class="lbl">Lien dossier Drive (coller ici)</span>
+    <input type="text" id="f_drive" placeholder="https://drive.google.com/..." oninput="autoSave()">
+  </div>
+
+  <div class="card">
+    <h3>Conditions soumission LI — rappel final</h3>
+    
+    <ul class="cl">
+      <li><input type="checkbox"><label>En vente +6 mois OU situation vendeur favorable (divorce / succession / urgence)</label></li>
+      <li><input type="checkbox"><label>Visite physique réalisée</label></li>
+      <li><input type="checkbox"><label>Négociation envisageable</label></li>
+      <li><input type="checkbox"><label>Potentiel de division identifié et faisable</label></li>
+      <li><input type="checkbox"><label>Marge pessimiste ≥ 20% confirmée</label></li>
+      <li><input type="checkbox"><label>Un seul projet actif — aucun autre dossier ouvert en parallèle</label></li>
+    </ul>
+    <div style="background:#f0faf4;border:1px solid #86efac;border-radius:8px;padding:10px;margin-top:12px;font-size:12px;color:#166534">
+      ✅ Tout coché → tu passes aux <strong>Lives LI</strong> (onglet <strong>6·Lives</strong>)
+    </div>
+  </div>
+
+</div>
+
+<!-- T7 LIVES LI -->
+<div id="t7" class="screen">
+
+<!-- STYLE PRÉSENTATION PREMIUM -->
+<style>
+.pres-wrap{background:#e8e6de;border-radius:14px;overflow:hidden;margin:-8px;font-family:'DM Sans',system-ui,sans-serif}
+.pres-topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:#eeecea;border-bottom:1px solid #d8d6ce}
+.pres-brand{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#1a5c3a}
+.pres-nav{display:flex;align-items:center;gap:8px}
+.pres-nav button{padding:6px 14px;border-radius:6px;border:1px solid #d8d6ce;background:transparent;color:#666;font-size:12px;cursor:pointer;transition:all .15s}
+.pres-nav button:hover{border-color:#c9a84c;color:#c9a84c}
+.pres-nav button.active-slide{background:#c9a84c;color:#0f0f0d;border-color:#c9a84c;font-weight:700}
+.pres-counter{font-size:11px;color:#888;font-family:'DM Mono',monospace;padding:0 8px}
+.slide{display:none;min-height:520px;padding:40px 48px;position:relative;animation:fadeIn .3s ease}
+.slide.active{display:flex;flex-direction:column;justify-content:center}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.slide-badge{display:inline-flex;align-items:center;gap:8px;padding:5px 14px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:20px;width:fit-content}
+.badge-blue{background:rgba(74,158,201,0.12);border:1px solid rgba(74,158,201,0.3);color:#4a9ec9}
+.badge-green{background:rgba(74,158,107,0.12);border:1px solid rgba(74,158,107,0.3);color:#4a9e6b}
+.badge-gold{background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.3);color:#c9a84c}
+.badge-white{background:rgba(240,237,230,0.08);border:1px solid rgba(240,237,230,0.15);color:#f0ede6}
+.slide-title{font-size:32px;font-weight:800;color:#1a1a18;line-height:1.15;margin-bottom:8px;letter-spacing:-0.5px}
+.slide-sub{font-size:15px;color:#666;margin-bottom:32px;line-height:1.5}
+.slide-grid{display:grid;gap:14px;margin-bottom:24px}
+.slide-grid.g2{grid-template-columns:1fr 1fr}
+.slide-grid.g3{grid-template-columns:1fr 1fr 1fr}
+.stat-box{background:#ffffff;border:1px solid #e0ddd5;border-radius:10px;padding:20px}
+.stat-box.gold{border-color:rgba(201,168,76,0.4);background:rgba(201,168,76,0.06)}
+.stat-box.green{border-color:rgba(74,158,107,0.4);background:rgba(74,158,107,0.06)}
+.stat-box.blue{border-color:rgba(74,158,201,0.4);background:rgba(74,158,201,0.06)}
+.stat-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#6a6760;margin-bottom:6px}
+.stat-value{font-size:28px;font-weight:800;color:#1a1a18;line-height:1;font-family:'DM Mono',monospace}
+.stat-value.gold{color:#c9a84c}
+.stat-value.green{color:#4a9e6b}
+.stat-value.blue{color:#4a9ec9}
+.stat-caption{font-size:11px;color:#888;margin-top:4px}
+.phrase-box{background:#fdf8ec;border-left:3px solid #c9a84c;border-radius:0 8px 8px 0;padding:16px 20px;margin-bottom:12px}
+.phrase-box p{font-size:14px;color:#444;line-height:1.7;margin:0}
+.phrase-box strong{color:#1a1a18}
+.check-list{display:flex;flex-direction:column;gap:8px}
+.check-item{display:flex;align-items:center;gap:12px;padding:10px 14px;background:#ffffff;border:1px solid #e0ddd5;border-radius:8px}
+.check-item .ci-icon{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
+.ci-green{background:rgba(74,158,107,0.2);color:#4a9e6b}
+.ci-blue{background:rgba(74,158,201,0.2);color:#4a9ec9}
+.ci-gold{background:rgba(201,168,76,0.2);color:#c9a84c}
+.check-item span{font-size:13px;color:#444}
+.doc-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#ffffff;border:1px solid #e0ddd5;border-radius:8px;margin-bottom:6px;gap:12px}
+.doc-row span{font-size:12px;color:#444;flex:1}
+.doc-row a{font-size:11px;color:#c9a84c;text-decoration:none;padding:4px 12px;border:1px solid rgba(201,168,76,0.3);border-radius:6px;white-space:nowrap;font-family:'DM Mono',monospace}
+.doc-row a:hover{background:rgba(201,168,76,0.1)}
+.doc-row a.off{color:#6a6760;border-color:#2e2e29;pointer-events:none}
+.red-box{background:rgba(201,74,74,0.08);border:1px solid rgba(201,74,74,0.25);border-radius:10px;padding:16px 20px}
+.red-box p{font-size:13px;color:#f87171;margin:0;line-height:1.7}
+.slide-footer{position:absolute;bottom:20px;right:24px;font-size:10px;color:#3a3a35;font-family:'DM Mono',monospace;letter-spacing:1px}
+.pres-controls{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:#eeecea;border-top:1px solid #d8d6ce}
+.btn-prev,.btn-next{padding:8px 20px;border-radius:8px;border:1px solid #d8d6ce;background:transparent;color:#444;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px}
+.btn-prev:hover{border-color:#4a9ec9;color:#4a9ec9}
+.btn-next{background:#c9a84c;color:#0f0f0d;border-color:#c9a84c}
+.btn-next:hover{background:#e0bc5a}
+.progress-dots{display:flex;gap:6px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:#d8d6ce;transition:all .2s;cursor:pointer}
+.dot.active{width:20px;border-radius:3px;background:#c9a84c}
+
+/* Champs dossier intégrés */
+.dossier-wrap{padding:24px;background:#e8e6de;color:#1a1a18}
+.dossier-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.dossier-field label{display:block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#6a6760;margin-bottom:4px}
+.dossier-field input,.dossier-field select{width:100%;background:#fff;border:1px solid #d8d6ce;border-radius:7px;padding:8px 11px;color:#1a1a18;font-size:13px;outline:none;transition:border-color .15s}
+.dossier-field input:focus,.dossier-field select:focus{border-color:#c9a84c}
+.dossier-section{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#888;margin:18px 0 10px;padding-bottom:6px;border-bottom:1px solid #e0ddd5}
+</style>
+
+<div class="pres-wrap">
+
+  <!-- TOPBAR -->
+  <div class="pres-topbar">
+    <div class="pres-brand">MDB · Présentation Live LI</div>
+    <div class="pres-nav">
+      <button onclick="goSlide(0)" id="tab-dossier" class="active-slide">⚙️ Dossier</button>
+      <button onclick="goSlide(1)" id="tab-l1">🔵 Live 1</button>
+      <button onclick="goSlide(4)" id="tab-l2">🟢 Live 2</button>
+      <button onclick="goSlide(7)" id="tab-l3">🟡 Live 3</button>
+    </div>
+    <div class="pres-counter"><span id="slide-num">1</span> / <span id="slide-total">1</span></div>
+  </div>
+
+  <!-- SLIDE 0 : DOSSIER -->
+  <div class="slide active" id="slide-0" style="padding:0">
+    <div class="dossier-wrap">
+      <div style="font-size:16px;font-weight:800;color:#c9a84c;margin-bottom:4px">⚙️ Dossier du bien</div>
+      <p style="font-size:11px;color:#6a6760;margin-bottom:16px;font-family:'DM Mono',monospace">Remplis une fois — tout se propage dans les 3 lives</p>
+      <div class="dossier-section">Le bien</div>
+      <div class="dossier-grid">
+        <div class="dossier-field"><label>Adresse exacte</label><input type="text" id="lv_adresse" placeholder="Obtenue après appel agent" oninput="refreshSlides();autoSave()"></div>
+        <div class="dossier-field"><label>Prix affiché FAI (€)</label><input type="number" id="lv_prix" oninput="refreshSlides();autoSave()"></div>
+        <div class="dossier-field"><label>Surface maison (m²)</label><input type="number" id="lv_sm" oninput="refreshSlides();autoSave()"></div>
+        <div class="dossier-field"><label>Surface terrain total (m²)</label><input type="number" id="lv_st" oninput="refreshSlides();autoSave()"></div>
+        <div class="dossier-field"><label>Terrain avec maison (m²)</label><input type="number" id="lv_stm" oninput="refreshSlides();autoSave()"></div>
+        <div class="dossier-field"><label>État du bien</label>
+          <select id="lv_etat" onchange="refreshSlides();autoSave()">
+            <option value="Bon état">Bon état (0%)</option>
+            <option value="Rafraîchissement simple">Rafraîchissement simple (-15% pess)</option>
+            <option value="Rénovation légère">Rénovation légère (-23% pess)</option>
+          </select>
+        </div>
+        <div class="dossier-field"><label>Zone PLU</label>
+          <select id="lv_plu" onchange="refreshSlides();autoSave()">
+            <option value="Zone U — constructible ✅">Zone U — constructible ✅</option>
+            <option value="Zone AU — à vérifier">Zone AU — à vérifier</option>
+          </select>
+        </div>
+        <div class="dossier-field"><label>Assainissement</label>
+          <select id="lv_assainis" onchange="refreshSlides();autoSave()">
+            <option value="Tout-à-l'égout ✅">Tout-à-l'égout ✅</option>
+            <option value="Fosse septique">Fosse septique — à vérifier</option>
+          </select>
+        </div>
+        <div class="dossier-field"><label>Accès voirie lot nu</label>
+          <select id="lv_voirie" onchange="refreshSlides();autoSave()">
+            <option value="✅ Accès direct confirmé">✅ Accès direct confirmé</option>
+            <option value="⚠️ Enclavé — servitude">⚠️ Enclavé — servitude à prévoir</option>
+          </select>
+        </div>
+        <div class="dossier-field"><label>Accord mairie</label>
+          <select id="lv_mairie" onchange="refreshSlides();autoSave()">
+            <option value="⏳ En attente">⏳ En attente</option>
+            <option value="✅ Accord de principe obtenu">✅ Accord de principe obtenu</option>
+          </select>
+        </div>
+        <div class="dossier-field"><label>Durée en vente</label><input type="text" id="lv_duree" placeholder="ex: 4 mois" oninput="refreshSlides();autoSave()"></div>
+        <div class="dossier-field"><label>Motif de vente</label><input type="text" id="lv_motif" placeholder="succession / divorce" oninput="refreshSlides();autoSave()"></div>
+        <div class="dossier-field"><label>Marge pessimiste (%)</label><input type="number" id="lv_pess" step="0.1" oninput="refreshSlides();autoSave()"></div>
+        <div class="dossier-field"><label>Prix max offre 20% (€)</label><input type="number" id="lv_pxmax" oninput="refreshSlides();autoSave()"></div>
+        <div class="dossier-field"><label>Prix d'offre retenu (€)</label><input type="number" id="lv_offre" oninput="refreshSlides();autoSave()"></div>
+        <div class="dossier-field"><label>Marge réaliste (%)</label><input type="number" id="lv_real" step="0.1" oninput="refreshSlides();autoSave()"></div>
+        <div class="dossier-field"><label>Marge optimiste (%)</label><input type="number" id="lv_opt" step="0.1" oninput="refreshSlides();autoSave()"></div>
+        <div class="dossier-field"><label>CA HT pessimiste (€)</label><input type="number" id="lv_ca_pess" oninput="refreshSlides();autoSave()"></div>
+      </div>
+      <div class="dossier-section">Liens Drive — Live 1</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div class="dossier-field"><label>Capture Géoportail PLU</label><input type="text" id="lk_l1_plu" placeholder="https://drive.google.com/..." oninput="autoSave()"></div>
+        <div class="dossier-field"><label>Plan cadastral</label><input type="text" id="lk_l1_cadastre" placeholder="https://drive.google.com/..." oninput="autoSave()"></div>
+        <div class="dossier-field"><label>Croquis de division</label><input type="text" id="lk_l1_croquis" placeholder="https://drive.google.com/..." oninput="autoSave()"></div>
+        <div class="dossier-field"><label>Accès voirie photo</label><input type="text" id="lk_l1_voirie" placeholder="https://drive.google.com/..." oninput="autoSave()"></div>
+        <div class="dossier-field"><label>Retour mairie écrit</label><input type="text" id="lk_l1_mairie" placeholder="https://drive.google.com/..." oninput="autoSave()"></div>
+        <div class="dossier-field"><label>Photos du bien</label><input type="text" id="lk_l1_photos" placeholder="https://drive.google.com/..." oninput="autoSave()"></div>
+      </div>
+      <div class="dossier-section">Liens Drive — Live 2</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div class="dossier-field"><label>Tableau Excel marge LI</label><input type="text" id="lk_l2_excel" placeholder="https://drive.google.com/..." oninput="autoSave()"></div>
+        <div class="dossier-field"><label>DVF parcelles voisines</label><input type="text" id="lk_l2_dvf" placeholder="https://drive.google.com/..." oninput="autoSave()"></div>
+        <div class="dossier-field"><label>Castorus historique</label><input type="text" id="lk_l2_castorus" placeholder="https://drive.google.com/..." oninput="autoSave()"></div>
+        <div class="dossier-field"><label>MeilleursAgents</label><input type="text" id="lk_l2_ma" placeholder="https://drive.google.com/..." oninput="autoSave()"></div>
+        <div class="dossier-field"><label>Photos + plan division</label><input type="text" id="lk_l2_photos" placeholder="https://drive.google.com/..." oninput="autoSave()"></div>
+      </div>
+      <div class="dossier-section">Liens Drive — Live 3</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div class="dossier-field"><label>Prix d'offre document</label><input type="text" id="lk_l3_offre" placeholder="https://drive.google.com/..." oninput="autoSave()"></div>
+        <div class="dossier-field"><label>Arguments négociation</label><input type="text" id="lk_l3_args" placeholder="https://drive.google.com/..." oninput="autoSave()"></div>
+        <div class="dossier-field"><label>Contexte vendeur</label><input type="text" id="lk_l3_vendeur" placeholder="https://drive.google.com/..." oninput="autoSave()"></div>
+        <div class="dossier-field"><label>Agent confirmé</label><input type="text" id="lk_l3_agent" placeholder="https://drive.google.com/..." oninput="autoSave()"></div>
+      </div>
+      <div class="dossier-section">Formulaire comité LI</div>
+      <div class="dossier-field"><label>Lien Google Forms comité (reçu après Live 3)</label><input type="text" id="f_forms_comite" placeholder="https://forms.monday.com/..." oninput="autoSave()"></div>
+    </div>
+  </div>
+
+  <!-- SLIDE 1 : LIVE 1 — INTRO -->
+  <div class="slide" id="slide-1">
+    <div class="slide-badge badge-blue">🔵 Live 1 — Urbanisme</div>
+    <div class="slide-title" id="s1-title">Projet de division parcellaire</div>
+    <div class="slide-sub" id="s1-sub">Bien identifié — faisabilité validée</div>
+    <div class="slide-grid g2">
+      <div class="stat-box">
+        <div class="stat-label">Adresse</div>
+        <div class="stat-value" style="font-size:16px;color:#1a1a18" id="s1-adr">—</div>
+      </div>
+      <div class="stat-box gold">
+        <div class="stat-label">Terrain divisible</div>
+        <div class="stat-value gold" id="s1-tdiv">—</div>
+        <div class="stat-caption">surface nette après maison</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Surface maison</div>
+        <div class="stat-value" id="s1-sm">—</div>
+      </div>
+      <div class="stat-box green">
+        <div class="stat-label">Zone PLU</div>
+        <div class="stat-value green" style="font-size:16px" id="s1-plu">—</div>
+      </div>
+    </div>
+    <div class="phrase-box">
+      <p>Le bien présente un terrain de <strong id="s1-st-p">—</strong> m² avec une maison de <strong id="s1-sm-p">—</strong> m². Après réservation de <strong id="s1-stm-p">—</strong> m² pour la maison, <strong id="s1-tdiv-p">—</strong> m² sont divisibles en <strong id="s1-nl-p">—</strong> lot(s) constructibles en zone U.</p>
+    </div>
+    <div class="slide-footer">SLIDE 1/3 — LIVE 1</div>
+  </div>
+
+  <!-- SLIDE 2 : LIVE 1 — PLU + DIVISION -->
+  <div class="slide" id="slide-2">
+    <div class="slide-badge badge-blue">🔵 Live 1 — Urbanisme</div>
+    <div class="slide-title">Faisabilité de division confirmée</div>
+    <div class="slide-sub">Vérifications urbanistiques complètes</div>
+    <div class="check-list">
+      <div class="check-item"><div class="ci-icon ci-green">✓</div><span>Zone PLU : <strong id="s2-plu" style="color:#1a1a18">—</strong> — terrain constructible confirmé</span></div>
+      <div class="check-item"><div class="ci-icon ci-green">✓</div><span>Accès voirie : <strong id="s2-voirie" style="color:#1a1a18">—</strong></span></div>
+      <div class="check-item"><div class="ci-icon ci-green">✓</div><span>Assainissement : <strong id="s2-assainis" style="color:#1a1a18">—</strong></span></div>
+      <div class="check-item"><div class="ci-icon ci-gold">⏳</div><span>Accord mairie : <strong id="s2-mairie" style="color:#1a1a18">—</strong></span></div>
+      <div class="check-item"><div class="ci-icon ci-blue">📋</div><span>Procédure : maison conservée → <strong style="color:#4a9e6b">pas de DP/PA obligatoire</strong> — juste géomètre</span></div>
+    </div>
+    <div class="phrase-box" style="margin-top:16px">
+      <p>Toutes les vérifications urbanistiques ont été réalisées. Le dossier est prêt pour soumission au comité LI.</p>
+    </div>
+    <div class="slide-footer">SLIDE 2/3 — LIVE 1</div>
+  </div>
+
+  <!-- SLIDE 3 : LIVE 1 — DOCUMENTS -->
+  <div class="slide" id="slide-3">
+    <div class="slide-badge badge-blue">🔵 Live 1 — Urbanisme</div>
+    <div class="slide-title">Documents produits</div>
+    <div class="slide-sub">Pièces disponibles pour validation LI</div>
+    <div id="docs-l1-slides"></div>
+    <div style="margin-top:16px">
+      <a href="https://forms.monday.com/forms/31a4ed65e7298101df788435e27fa0f0?r=euc1" target="_blank" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#1e40af;color:#fff;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600">📋 Ouvrir le formulaire Live 1 →</a>
+    </div>
+    <div class="slide-footer">SLIDE 3/3 — LIVE 1</div>
+  </div>
+
+  <!-- SLIDE 4 : LIVE 2 — MARGE -->
+  <div class="slide" id="slide-4">
+    <div class="slide-badge badge-green">🟢 Live 2 — Sourcing</div>
+    <div class="slide-title">Analyse de marge — 3 scénarios</div>
+    <div class="slide-sub">Formule LI exacte — décision GO sur le pessimiste</div>
+    <div class="slide-grid g3">
+      <div class="stat-box blue">
+        <div class="stat-label">Optimiste</div>
+        <div class="stat-value blue" id="s4-opt">—%</div>
+        <div class="stat-caption" id="s4-opt-ca"></div>
+      </div>
+      <div class="stat-box" style="border-color:rgba(74,158,107,0.4);background:rgba(74,158,107,0.06)">
+        <div class="stat-label">Réaliste</div>
+        <div class="stat-value green" id="s4-real">—%</div>
+      </div>
+      <div class="stat-box gold" id="s4-pess-box">
+        <div class="stat-label">Pessimiste ★ GO si ≥ 20%</div>
+        <div class="stat-value gold" id="s4-pess">—%</div>
+        <div class="stat-caption" id="s4-pess-status"></div>
+      </div>
+    </div>
+    <div class="slide-grid g2">
+      <div class="stat-box">
+        <div class="stat-label">Prix d'achat FAI</div>
+        <div class="stat-value" style="font-size:20px" id="s4-prix">—</div>
+      </div>
+      <div class="stat-box green">
+        <div class="stat-label">Prix max offre (20% pess)</div>
+        <div class="stat-value green" style="font-size:20px" id="s4-pxmax">—</div>
+      </div>
+    </div>
+    <div class="slide-footer">SLIDE 1/3 — LIVE 2</div>
+  </div>
+
+  <!-- SLIDE 5 : LIVE 2 — COÛTS -->
+  <div class="slide" id="slide-5">
+    <div class="slide-badge badge-green">🟢 Live 2 — Sourcing</div>
+    <div class="slide-title">Détail des coûts d'acquisition</div>
+    <div class="slide-sub">Stratégie sans travaux — décote intégrée dans le prix de revente</div>
+    <div class="check-list">
+      <div class="check-item"><div class="ci-icon ci-gold">€</div><span>Prix achat FAI : <strong id="s5-prix" style="color:#c9a84c">—</strong></span></div>
+      <div class="check-item"><div class="ci-icon ci-blue">%</div><span>Frais mutation 3% : <strong id="s5-not" style="color:#1a1a18">—</strong></span></div>
+      <div class="check-item"><div class="ci-icon ci-blue">📐</div><span>Géomètre + bornage : <strong style="color:#1a1a18">2 500 €</strong></span></div>
+      <div class="check-item"><div class="ci-icon ci-blue">📅</div><span>Taxe foncière prorata : <strong style="color:#1a1a18">700 €</strong></span></div>
+      <div class="check-item"><div class="ci-icon ci-blue">🔧</div><span>Travaux : <strong style="color:#4a9e6b">0 € — vendu en l'état</strong></span></div>
+      <div class="check-item"><div class="ci-icon ci-gold">⚡</div><span>Aléas 5% : <strong id="s5-alea" style="color:#1a1a18">—</strong></span></div>
+      <div class="check-item"><div class="ci-icon ci-blue">🏘️</div><span>Frais agence revente : <strong style="color:#1a1a18">5% TTC déduits du CA</strong></span></div>
+    </div>
+    <div class="phrase-box" style="margin-top:12px">
+      <p>Taxe d'aménagement payée par l'acheteur du lot — <strong>rien à prévoir côté acquisition</strong>. Décote travaux déjà intégrée dans les prix de revente pessimistes.</p>
+    </div>
+    <div class="slide-footer">SLIDE 2/3 — LIVE 2</div>
+  </div>
+
+  <!-- SLIDE 6 : LIVE 2 — VENDEUR + DOCS -->
+  <div class="slide" id="slide-6">
+    <div class="slide-badge badge-green">🟢 Live 2 — Sourcing</div>
+    <div class="slide-title">Contexte vendeur + Documents</div>
+    <div class="slide-sub">Analyse motivation et pression vendeur</div>
+    <div class="slide-grid g2" style="margin-bottom:16px">
+      <div class="stat-box">
+        <div class="stat-label">Durée en vente</div>
+        <div class="stat-value" style="font-size:18px;color:#1a1a18" id="s6-duree">—</div>
+      </div>
+      <div class="stat-box gold">
+        <div class="stat-label">Motif de vente</div>
+        <div class="stat-value gold" style="font-size:16px" id="s6-motif">—</div>
+      </div>
+    </div>
+    <div id="docs-l2-slides"></div>
+    <div style="margin-top:12px">
+      <a href="https://forms.monday.com/forms/de151944a4911af83281e0a78b5bb8a7?r=euc1" target="_blank" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#166534;color:#fff;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600">📋 Ouvrir le formulaire Live 2 →</a>
+    </div>
+    <div class="slide-footer">SLIDE 3/3 — LIVE 2</div>
+  </div>
+
+  <!-- SLIDE 7 : LIVE 3 — OFFRE -->
+  <div class="slide" id="slide-7">
+    <div class="slide-badge badge-gold">🟡 Live 3 — Négociation</div>
+    <div class="slide-title">L'offre retenue</div>
+    <div class="slide-sub">Prix calculé sur la réalité du marché DVF</div>
+    <div class="slide-grid g3">
+      <div class="stat-box">
+        <div class="stat-label">Prix affiché FAI</div>
+        <div class="stat-value" style="font-size:20px" id="s7-affiche">—</div>
+      </div>
+      <div class="stat-box gold">
+        <div class="stat-label">Mon offre</div>
+        <div class="stat-value gold" style="font-size:24px" id="s7-offre">—</div>
+      </div>
+      <div class="stat-box green">
+        <div class="stat-label">Marge pessimiste</div>
+        <div class="stat-value green" id="s7-pess">—%</div>
+      </div>
+    </div>
+    <div class="phrase-box">
+      <p><strong>"J'achète comptant, sans condition bancaire."</strong><br>La vente peut se conclure rapidement. Mon offre est calculée sur les prix réels du marché local — pas une estimation théorique.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+      <div style="background:#edf7f1;border:1px solid #b6dfc8;border-radius:8px;padding:11px 14px;font-size:13px">
+        <strong style="color:#1a5c3a">Plan A — Offre directe</strong><br>
+        <span style="color:#444">Prix cible pessimiste — comptant — sans condition bancaire — réponse sous 48h</span>
+      </div>
+      <div style="background:#fdf8ec;border:1px solid #f0d98a;border-radius:8px;padding:11px 14px;font-size:13px">
+        <strong style="color:#7a5500">Plan B — Si refus Plan A</strong><br>
+        <span style="color:#444">"À quel prix vous seriez vendeurs ?" — écouter sans répondre. Retour LI avant toute contre-proposition.</span>
+      </div>
+      <div style="background:#fdf0f0;border:1px solid #f0b8b8;border-radius:8px;padding:11px 14px;font-size:13px">
+        <strong style="color:#8b2020">Plan de sortie</strong><br>
+        <span style="color:#444">"Je comprends. Je reviens vers vous si j'ai une évolution." → Relance 6-8 semaines.</span>
+      </div>
+    </div>
+    <div class="slide-footer">SLIDE 1/3 — LIVE 3</div>
+  </div>
+
+  <!-- SLIDE 8 : LIVE 3 — OBJECTIONS LI -->
+  <div class="slide" id="slide-8">
+    <div class="slide-badge badge-gold">🟡 Live 3 — Négociation</div>
+    <div class="slide-title">Objections — réponses préparées</div>
+    <div class="slide-sub">Méthode LI : écouter → reformuler → recadrer</div>
+    <div style="display:flex;flex-direction:column;gap:7px">
+      <div style="background:#fff;border:1px solid #e0ddd5;border-radius:8px;padding:10px 14px;font-size:12px">
+        <strong style="color:#8b2020">"C'est trop bas."</strong><br>
+        <span style="color:#444">"Mon prix est basé sur les ventes réelles notarisées dans le secteur — pas les prix affichés. C'est ce que le marché valide réellement."</span>
+      </div>
+      <div style="background:#fff;border:1px solid #e0ddd5;border-radius:8px;padding:10px 14px;font-size:12px">
+        <strong style="color:#8b2020">"On n'est pas pressés."</strong><br>
+        <span style="color:#444">"C'est maintenant que vous pouvez choisir votre acheteur. Je suis là, financement garanti, pas d'aléa."</span>
+      </div>
+      <div style="background:#fff;border:1px solid #e0ddd5;border-radius:8px;padding:10px 14px;font-size:12px">
+        <strong style="color:#8b2020">"On attend d'autres offres."</strong><br>
+        <span style="color:#444">"Mon offre est valable [X jours]. Si rien de mieux ne se présente, je suis disponible pour avancer rapidement."</span>
+      </div>
+      <div style="background:#fff;border:1px solid #e0ddd5;border-radius:8px;padding:10px 14px;font-size:12px">
+        <strong style="color:#8b2020">"Je préfère un particulier."</strong><br>
+        <span style="color:#444">"Je comprends. Sachez que je vais vite, je sécurise, et je ne négocie pas deux fois. Si un particulier ne se présente pas, je suis là."</span>
+      </div>
+      <div style="background:#fdf8ec;border-left:3px solid #c9a84c;border-radius:0 8px 8px 0;padding:10px 14px;font-size:12px;color:#444">
+        <strong style="color:#7a5500">Méthode NT6 :</strong> Écouter → Reformuler → Valider l'émotion → Rappeler le cadre → Laisser une porte
+      </div>
+    </div>
+    <div class="slide-footer">SLIDE 2/3 — LIVE 3</div>
+  </div>
+
+  <!-- SLIDE 9 : LIVE 3 — DOCS -->
+  <div class="slide" id="slide-9">
+    <div class="slide-badge badge-gold">🟡 Live 3 — Négociation</div>
+    <div class="slide-title">Documents + Formulaire Live 3</div>
+    <div class="slide-sub">Dossier complet pour validation LI</div>
+    <div id="docs-l3-slides"></div>
+    <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+      <a href="https://forms.monday.com/forms/7ae2aac79d8d5167919b6f6ad666a129?r=euc1" target="_blank" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#b8860b;color:#fff;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600">📋 Ouvrir le formulaire Live 3 →</a>
+    </div>
+    <div class="slide-footer">SLIDE 3/3 — LIVE 3</div>
+  </div>
+
+  <!-- CONTROLES -->
+  <div class="pres-controls">
+    <button class="btn-prev" onclick="prevSlide()">← Précédent</button>
+    <div class="progress-dots" id="progress-dots"></div>
+    <button class="btn-next" onclick="nextSlide()">Suivant →</button>
+  </div>
+
+</div><!-- fin pres-wrap -->
+
+<script>
+var SLIDES_TOTAL = 10;
+var currentSlide = 0;
+
+function goSlide(n){
+  document.querySelectorAll('.slide').forEach(function(s){s.classList.remove('active')});
+  var el = document.getElementById('slide-'+n);
+  if(el) el.classList.add('active');
+  currentSlide = n;
+  document.getElementById('slide-num').textContent = n+1;
+  document.getElementById('slide-total').textContent = SLIDES_TOTAL;
+  // Dots
+  var dots = document.getElementById('progress-dots');
+  if(dots){
+    dots.innerHTML = '';
+    for(var i=0;i<SLIDES_TOTAL;i++){
+      var d = document.createElement('div');
+      d.className = 'dot'+(i===n?' active':'');
+      d.onclick = (function(idx){return function(){goSlide(idx)}})(i);
+      dots.appendChild(d);
+    }
+  }
+  // Tabs actifs
+  ['tab-dossier','tab-l1','tab-l2','tab-l3'].forEach(function(t){
+    var el=document.getElementById(t);if(el)el.classList.remove('active-slide');
+  });
+  if(n===0)document.getElementById('tab-dossier').classList.add('active-slide');
+  else if(n>=1&&n<=3)document.getElementById('tab-l1').classList.add('active-slide');
+  else if(n>=4&&n<=6)document.getElementById('tab-l2').classList.add('active-slide');
+  else if(n>=7)document.getElementById('tab-l3').classList.add('active-slide');
+}
+
+function nextSlide(){if(currentSlide<SLIDES_TOTAL-1)goSlide(currentSlide+1);}
+function prevSlide(){if(currentSlide>0)goSlide(currentSlide-1);}
+
+function fmtE(n){if(!n||isNaN(parseFloat(n)))return'—';return Math.round(parseFloat(n)).toLocaleString('fr-FR')+' €';}
+function fmtP(n){if(!n||isNaN(parseFloat(n)))return'—%';return parseFloat(n).toFixed(1)+'%';}
+
+function refreshSlides(){
+  var adr=document.getElementById('lv_adresse')&&document.getElementById('lv_adresse').value||'';
+  var prix=document.getElementById('lv_prix')&&document.getElementById('lv_prix').value||'';
+  var sm=document.getElementById('lv_sm')&&document.getElementById('lv_sm').value||'';
+  var st=document.getElementById('lv_st')&&document.getElementById('lv_st').value||'';
+  var stm=document.getElementById('lv_stm')&&document.getElementById('lv_stm').value||'';
+  var plu=document.getElementById('lv_plu')&&document.getElementById('lv_plu').value||'';
+  var etat=document.getElementById('lv_etat')&&document.getElementById('lv_etat').value||'';
+  var assainis=document.getElementById('lv_assainis')&&document.getElementById('lv_assainis').value||'';
+  var voirie=document.getElementById('lv_voirie')&&document.getElementById('lv_voirie').value||'';
+  var mairie=document.getElementById('lv_mairie')&&document.getElementById('lv_mairie').value||'';
+  var duree=document.getElementById('lv_duree')&&document.getElementById('lv_duree').value||'';
+  var motif=document.getElementById('lv_motif')&&document.getElementById('lv_motif').value||'';
+  var pess=document.getElementById('lv_pess')&&document.getElementById('lv_pess').value||'';
+  var real=document.getElementById('lv_real')&&document.getElementById('lv_real').value||'';
+  var opt=document.getElementById('lv_opt')&&document.getElementById('lv_opt').value||'';
+  var pxmax=document.getElementById('lv_pxmax')&&document.getElementById('lv_pxmax').value||'';
+  var offre=document.getElementById('lv_offre')&&document.getElementById('lv_offre').value||'';
+  var nl=parseInt(document.getElementById('f_nlots_manual')&&document.getElementById('f_nlots_manual').value||document.getElementById('f_nlots')&&document.getElementById('f_nlots').value||0)||0;
+  var tdiv=st&&stm?Math.max(parseFloat(st)-parseFloat(stm),0):'';
+  var prixN=parseFloat(prix)||0;
+
+  // Slide 1
+  function ss(id,v){var e=document.getElementById(id);if(e)e.textContent=v||'—';}
+  ss('s1-title', adr||'Projet de division parcellaire');
+  ss('s1-sub', (st?st+' m² de terrain':'')+( stm?' · maison '+sm+' m²':''));
+  ss('s1-adr', adr);
+  ss('s1-tdiv', tdiv?tdiv+' m²':'—');
+  ss('s1-sm', sm?sm+' m²':'—');
+  ss('s1-plu', plu);
+  ss('s1-st-p', st); ss('s1-sm-p', sm); ss('s1-stm-p', stm);
+  ss('s1-tdiv-p', tdiv||'—'); ss('s1-nl-p', nl||'—');
+
+  // Slide 2
+  ss('s2-plu', plu); ss('s2-voirie', voirie); ss('s2-assainis', assainis); ss('s2-mairie', mairie);
+
+  // Slide 3 docs L1
+  renderDocsSlide('docs-l1-slides', [
+    {id:'lk_l1_plu',label:'Capture Géoportail — zone PLU'},
+    {id:'lk_l1_cadastre',label:'Plan cadastral'},
+    {id:'lk_l1_croquis',label:'Croquis de division'},
+    {id:'lk_l1_voirie',label:'Accès voirie — photo'},
+    {id:'lk_l1_mairie',label:'Retour mairie écrit'},
+    {id:'lk_l1_photos',label:'Photos du bien'}
+  ]);
+
+  // Slide 4
+  ss('s4-opt', fmtP(opt)); ss('s4-real', fmtP(real)); ss('s4-pess', fmtP(pess));
+  ss('s4-prix', fmtE(prix)); ss('s4-pxmax', fmtE(pxmax));
+  var pb=document.getElementById('s4-pess-box');
+  if(pb&&pess){
+    var pv=parseFloat(pess);
+    pb.style.borderColor=pv>=20?'rgba(74,158,107,0.4)':'rgba(201,74,74,0.4)';
+    pb.style.background=pv>=20?'rgba(74,158,107,0.06)':'rgba(201,74,74,0.06)';
+    var pst=document.getElementById('s4-pess-status');
+    if(pst)pst.textContent=pv>=20?'✅ GO — critère LI validé':'⚠️ Sous les 20% LI';
+  }
+
+  // Slide 5
+  ss('s5-prix', fmtE(prix));
+  ss('s5-not', prixN?fmtE(prixN*0.03):'—');
+  ss('s5-alea', prixN?fmtE(prixN*0.05):'—');
+
+  // Slide 6
+  ss('s6-duree', duree||'—'); ss('s6-motif', motif||'—');
+  renderDocsSlide('docs-l2-slides', [
+    {id:'lk_l2_excel',label:'Tableau Excel marge LI — 3 scénarios'},
+    {id:'lk_l2_dvf',label:'DVF parcelles voisines'},
+    {id:'lk_l2_castorus',label:'Castorus — historique baisses'},
+    {id:'lk_l2_ma',label:'MeilleursAgents — prix m² secteur'},
+    {id:'lk_l2_photos',label:'Photos + plan de division'}
+  ]);
+
+  // Slide 7
+  ss('s7-affiche', fmtE(prix)); ss('s7-offre', fmtE(offre)); ss('s7-pess', fmtP(pess));
+
+  // Slide 8
+  ss('s8-duree-arg', duree?'En vente depuis '+duree+' — vendeur exposé, pression réelle':'Durée en vente : à renseigner');
+  ss('s8-etat-arg', etat?etat+' — décote appliquée sur la revente de la maison':'État du bien : à renseigner');
+
+  // Slide 9
+  renderDocsSlide('docs-l3-slides', [
+    {id:'lk_l3_offre',label:'Prix d\'offre retenu — document'},
+    {id:'lk_l3_args',label:'Arguments de négociation'},
+    {id:'lk_l3_vendeur',label:'Contexte vendeur complet'},
+    {id:'lk_l3_agent',label:'Agent confirmé'}
+  ]);
+}
+
+function renderDocsSlide(containerId, docs){
+  var c = document.getElementById(containerId);
+  if(!c) return;
+  c.innerHTML = docs.map(function(d){
+    var inp = document.getElementById(d.id);
+    var url = inp ? inp.value.trim() : '';
+    var hasUrl = url && url.startsWith('http');
+    return '<div class="doc-row"><span>'+d.label+'</span><a href="'+(hasUrl?url:'#')+'" target="_blank" class="'+(hasUrl?'':'off')+'">'+(hasUrl?'Ouvrir →':'— pas de lien —')+'</a></div>';
+  }).join('');
+}
+
+// Init
+setTimeout(function(){goSlide(0);refreshSlides();}, 100);
+</script>
+
+</div>
+
+<!-- T8 OFFRE -->
+<div id="t8" class="screen">
+  <div class="card">
+    <h3>Conditions GO offre</h3>
+    <div class="hl">⚠️ L'offre est rédigée et signée par BAT Investissement (Tatiana Garcia). Jamais par Cédric.</div>
+    <ul class="cl">
+      <li><input type="checkbox"><label>GO comité LI reçu</label></li>
+      <li><input type="checkbox"><label>Dossier Drive complet transmis à LI — obligatoire avant GO comité</label></li>
+      <li><input type="checkbox"><label>Visite physique réalisée</label></li>
+      <li><input type="checkbox"><label>Agent OK pour présentation en direct aux vendeurs</label></li>
+      <li><input type="checkbox"><label>Marge pessimiste ≥ 20% confirmée</label></li>
+      <li><input type="checkbox"><label>Document FE-MDB-008 obtenu auprès de LI — signé BAT Investissement</label></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Script présentation de l'offre</h3>
+    <p style="font-size:11px;color:#888;margin-bottom:12px">En personne — vendeurs + agent ensemble. Ne jamais envoyer l'offre par mail.</p>
+
+    <h4 class="section">Ouverture — avec l'agent</h4>
+    <div class="sb">"J'ai étudié le bien en détail. Je suis prêt à faire une offre aujourd'hui, en direct avec vous et les vendeurs. Achat comptant, pas de condition bancaire — la vente peut se faire rapidement si on s'accorde."</div>
+
+    <h4 class="section">Présentation du prix — avec les vendeurs</h4>
+    <div class="sb">"J'ai analysé le marché de près. Mon offre est à [PRIX] euros. Ce prix est calculé sur la réalité du marché local — pas une estimation théorique. Je ne négocie pas après coup, ce que je propose aujourd'hui c'est ce que je peux faire."</div>
+
+    <h4 class="section">Si vendeur demande pourquoi si bas</h4>
+    <div class="sb">"Je regarde les ventes réelles dans le secteur — pas les prix demandés. Votre bien a des qualités, mais il a aussi [état / durée en vente / travaux à prévoir] qui impactent le prix réel. Mon offre en tient compte honnêtement."</div>
+
+    <h4 class="section">Fermeture — rassurer l'agent</h4>
+    <div class="sb">"Vos honoraires sont préservés intégralement. Je travaille toujours avec les agents — pas contre eux. Si les vendeurs acceptent, je vous recontacte dans les 24h pour organiser la suite."</div>
+
+    <h4 class="section">Ce qu'on ne dit jamais</h4>
+    <div style="background:#fdf0f0;border:1px solid #f0b8b8;border-radius:8px;padding:10px;font-size:12px;color:#8b2020">
+      ❌ Ne jamais mentionner Link Invests ou tout organisme de portage<br>
+      ❌ Ne jamais parler de division du terrain<br>
+      ❌ Ne jamais donner deux prix différents en même réunion<br>
+      ❌ Ne jamais envoyer l'offre par mail — toujours en personne
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Présentation de l'offre (FE-MDB-008)</h3>
+    <ul class="cl">
+      <li><input type="checkbox"><label>Présentation EN PERSONNE — vendeurs + agent ensemble</label></li>
+      <li><input type="checkbox"><label>Mettre en avant : comptant, sans condition bancaire, rapide</label></li>
+      <li><input type="checkbox"><label>Exposer les éléments de négociation calmement — pas d'urgence affichée</label></li>
+      <li><input type="checkbox"><label>Ne pas mettre la pression — laisser le temps de répondre</label></li>
+      <li><input type="checkbox"><label>Exiger réponse par écrit → transmettre à Link Invests</label></li>
+    </ul>
+    <div class="sep"></div>
+    <div class="r2">
+      <div><span class="lbl">Prix d'offre retenu (€)</span><input type="number" id="f_offre" oninput="autoSave()"></div>
+      <div><span class="lbl">Date présentation prévue</span><input type="date" id="f_doff" onchange="autoSave()"></div>
+    </div>
+    <span class="lbl">Notes négociation — arguments préparés</span>
+    <textarea id="f_nego" rows="4" placeholder="Points faibles du bien, durée en vente, offres précédentes refusées, contexte vendeur..." oninput="autoSave()" style="resize:vertical"></textarea>
+
+    <div style="margin-top:14px;background:#f0faf4;border:1px solid #b6dfc8;border-radius:9px;padding:12px">
+      <div style="font-size:12px;font-weight:600;color:#1a5c3a;margin-bottom:10px">🎯 Structure scénario négo — 4 briques à préparer à l'avance</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="background:#fff;border:1px solid #b6dfc8;border-radius:7px;padding:9px 12px;font-size:12px">
+          <strong style="color:#1a5c3a">1. Accroche claire</strong><br>
+          <span style="color:#666">"Je vous appelle car j'ai étudié le bien et j'ai une proposition à vous faire."</span>
+        </div>
+        <div style="background:#fff;border:1px solid #b6dfc8;border-radius:7px;padding:9px 12px;font-size:12px">
+          <strong style="color:#1a5c3a">2. Valorisation du vendeur</strong><br>
+          <span style="color:#666">"Votre bien a du potentiel, et je comprends votre position."</span>
+        </div>
+        <div style="background:#fff;border:1px solid #b6dfc8;border-radius:7px;padding:9px 12px;font-size:12px">
+          <strong style="color:#1a5c3a">3. Cadrage de l'offre</strong><br>
+          <span style="color:#666">"Je ne suis pas sur le prix affiché, mais je suis prêt à faire une offre sérieuse et rapide."</span>
+        </div>
+        <div style="background:#fff;border:1px solid #b6dfc8;border-radius:7px;padding:9px 12px;font-size:12px">
+          <strong style="color:#1a5c3a">4. Conditionnement</strong><br>
+          <span style="color:#666">"Je suis positionné, j'avance vite, mais uniquement à ce prix / ces conditions."</span>
+        </div>
+      </div>
+      <div style="font-size:11px;color:#7a5500;background:#fdf8ec;border:1px solid #f0d98a;border-radius:6px;padding:7px 10px;margin-top:10px">
+        ⚠️ Erreurs à éviter : justifier ton offre trop tôt / demander un rabais sans cadre / subir la discussion au lieu de la piloter. La négo se prépare comme un RDV pro — pas d'improvisation.
+      </div>
+
+      <div style="margin-top:12px">
+        <div style="font-size:12px;font-weight:600;color:#1a3a6b;margin-bottom:8px">📋 Plan A / Plan B / Plan de sortie (NT9 LI)</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="background:#edf7f1;border:1px solid #b6dfc8;border-radius:7px;padding:9px 12px;font-size:12px">
+            <strong style="color:#1a5c3a">Plan A — Offre directe</strong><br>
+            <span style="color:#444">Prix cible pessimiste — comptant — sans condition bancaire — réponse sous 48h</span>
+          </div>
+          <div style="background:#fdf8ec;border:1px solid #f0d98a;border-radius:7px;padding:9px 12px;font-size:12px">
+            <strong style="color:#7a5500">Plan B — Si refus Plan A</strong><br>
+            <span style="color:#444">Demander : "À quel prix vous seriez vendeurs ?" — écouter sans répondre. Retourner voir LI avant toute contre-proposition. Ne jamais accepter seul.</span>
+          </div>
+          <div style="background:#fdf0f0;border:1px solid #f0b8b8;border-radius:7px;padding:9px 12px;font-size:12px">
+            <strong style="color:#8b2020">Plan de sortie — Si impossible</strong><br>
+            <span style="color:#444">"Je comprends. Je vais voir ce que je peux faire de mon côté. Je reviens vers vous si j'ai une évolution." → Relance dans 6-8 semaines.</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <div style="font-size:12px;font-weight:600;color:#1a3a6b;margin-bottom:8px">💬 Objections classiques — réponses préparées</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="background:#fff;border:1px solid #e8e6e0;border-radius:7px;padding:9px 12px;font-size:12px">
+            <strong style="color:#8b2020">"C'est trop bas."</strong><br>
+            <span style="color:#444">"Je comprends. Mon prix est basé sur les ventes réelles notarisées dans le secteur, pas sur les prix affichés. C'est ce que le marché valide réellement."</span>
+          </div>
+          <div style="background:#fff;border:1px solid #e8e6e0;border-radius:7px;padding:9px 12px;font-size:12px">
+            <strong style="color:#8b2020">"On n'est pas pressés."</strong><br>
+            <span style="color:#444">"Justement, c'est maintenant que vous pouvez choisir votre acheteur. Je suis là, financement garanti, pas d'aléa."</span>
+          </div>
+          <div style="background:#fff;border:1px solid #e8e6e0;border-radius:7px;padding:9px 12px;font-size:12px">
+            <strong style="color:#8b2020">"On attend d'autres offres."</strong><br>
+            <span style="color:#444">"Bien sûr. Mon offre est valable [X jours]. Si rien de mieux ne se présente, je suis disponible pour avancer rapidement."</span>
+          </div>
+          <div style="background:#fff;border:1px solid #e8e6e0;border-radius:7px;padding:9px 12px;font-size:12px">
+            <strong style="color:#8b2020">"Je veux réfléchir."</strong><br>
+            <span style="color:#444">"Pas de souci. Mon offre tient jusqu'au [date]. Si c'est encore d'actualité pour vous à ce moment-là, on avance."</span>
+          </div>
+          <div style="background:#fff;border:1px solid #e8e6e0;border-radius:7px;padding:9px 12px;font-size:12px">
+            <strong style="color:#8b2020">"Je préfère un particulier."</strong><br>
+            <span style="color:#444">"Je respecte. Juste, sachez que je vais vite, je sécurise, et je ne négocie pas deux fois. Si un particulier ne se présente pas, je suis là."</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px;background:#f8f7f4;border:1px solid #e8e6e0;border-radius:9px;padding:12px">
+        <div style="font-size:12px;font-weight:600;color:#1a3a6b;margin-bottom:8px">🔄 Méthode reformulation active — 5 étapes (NT6 LI)</div>
+        <div style="font-size:11px;color:#555;margin-bottom:8px">Une objection = une peur, un doute ou un test. Non = information, pas rejet. Écouter, reformuler, recadrer sans perdre en autorité.</div>
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <div style="background:#fff;border:1px solid #e8e6e0;border-radius:6px;padding:7px 10px;font-size:11px"><strong>1. Écouter</strong> jusqu'au bout — ne pas couper</div>
+          <div style="background:#fff;border:1px solid #e8e6e0;border-radius:6px;padding:7px 10px;font-size:11px"><strong>2. Reformuler</strong> — "Si je comprends bien, ce qui vous gêne, c'est…"</div>
+          <div style="background:#fff;border:1px solid #e8e6e0;border-radius:6px;padding:7px 10px;font-size:11px"><strong>3. Valider</strong> l'émotion — "Je comprends que vous ayez besoin de temps."</div>
+          <div style="background:#fff;border:1px solid #e8e6e0;border-radius:6px;padding:7px 10px;font-size:11px"><strong>4. Rappeler le cadre</strong> — "De mon côté, je suis positionné maintenant avec une offre ferme."</div>
+          <div style="background:#fff;border:1px solid #e8e6e0;border-radius:6px;padding:7px 10px;font-size:11px"><strong>5. Laisser une porte</strong> — "Si votre position évolue, je reste joignable pendant [X jours]."</div>
+        </div>
+        <div style="margin-top:8px;font-size:11px;color:#8b2020;background:#fdf0f0;border:1px solid #f0b8b8;border-radius:6px;padding:6px 10px">
+          ❌ Jamais : se justifier ("j'ai des frais...") / forcer ("c'est une super offre") / contredire frontalement
+        </div>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+    <ul class="cl">
+      <li><input type="checkbox"><label>Offre acceptée → onglet 8·Post</label></li>
+      <li><input type="checkbox"><label>Contre-offre → analyser avec LI avant de répondre — ne jamais accepter seul</label></li>
+      <li><input type="checkbox"><label>Refus → relancer agent dans 6 à 8 semaines</label></li>
+    </ul>
+  </div>
+</div>
+
+<!-- T9 POST-ACCEPTATION -->
+<div id="t9" class="screen">
+
+  <div class="card">
+    <h3>Offre acceptée — que faire ? (schéma LI)</h3>
+    <div class="hl">⚠️ C'est BAT Investissement (Tatiana Garcia) qui signe tout — jamais Cédric directement. Link Invests s'occupe des coordonnées du notaire et de l'agent.</div>
+
+    <div class="ps"><div class="pn">1</div><div class="pc"><h4 class="section">Envoyer l'offre signée à LI par mail</h4><p> — offre rédigée et signée par BAT Investissement</p></div></div>
+    <div class="ps"><div class="pn">2</div><div class="pc"><h4 class="section">LI envoie les pièces au notaire + agent</h4><p>Link Invests gère cette partie entièrement</p></div></div>
+    <div class="ps"><div class="pn">3</div><div class="pc"><h4 class="section">Établir le croquis prévisionnel de division</h4><p>Sur Géoportail — plan précis Lot A + Lot B + surfaces</p></div></div>
+    <div class="ps"><div class="pn">4a</div><div class="pc">
+      <h4 class="section">Demande de devis à 3 géomètres minimum</h4>
+      <p style="margin-bottom:8px;font-size:11px;color:#888">Coordonnées géomètres dans ton Notion Contacts. Envoie ce mail à chacun :</p>
+      <button class="btn btn-sm" style="margin-bottom:8px;font-size:11px" onclick="genMailGeo()">↻ Générer depuis les données du bien</button>
+      <div id="mail_geo_content" style="font-size:11px;background:#f8f7f4;padding:10px;border-radius:6px;line-height:1.7;white-space:pre-wrap">Objet : Demande de devis pour une division parcellaire
+
+Madame, Monsieur,
+
+Je me permets de vous contacter dans le cadre d'un projet de division parcellaire concernant un terrain situé à [ADRESSE], que je souhaite diviser en [NOMBRE] parcelles.
+
+Je vous serai reconnaissant de bien vouloir me faire parvenir un devis détaillé incluant :
+• La réalisation d'un bornage / délimitation des parcelles
+• La préparation des plans de division
+• Les démarches administratives (déclarations en mairie, etc.)
+• Les autres frais éventuels liés à cette opération
+
+Le devis est à adresser à BAT Investissement, 41 rue des Souchets, 74130 Bonneville.
+Je vous transmets en pièce jointe une projection de mon projet de division.
+
+Cédric Buard — Marchand de biens</div>
+      <div style="margin-top:8px;display:flex;align-items:center;gap:10px">
+        <button class="btn btn-sm" onclick="copierMailGeo()">📋 Copier le mail</button>
+        <span id="mail_geo_copied" style="font-size:12px;color:#166534;display:none">✓ Copié !</span>
+      </div>
+    </div></div>
+    <div class="ps"><div class="pn">4b</div><div class="pc">
+      <h4 class="section">Certificat d'Urbanisme Opérationnel (CU-b)</h4>
+      <p>Avant ou après offre acceptée — le géomètre peut le faire à ta place. Délai mairie : 2 mois. À faire dès l'offre acceptée.</p>
+    </div></div>
+    <div class="ps"><div class="pn">5</div><div class="pc"><h4 class="section">Monter le dossier administratif</h4><p>Transférer diagnostics + DP/PC si déjà obtenus</p></div></div>
+    <div class="ps"><div class="pn">6</div><div class="pc"><h4 class="section">Estimation de revente des lots par l'agent</h4><p>Confirmation des prix de revente par lot — à faire valider par l'agent</p></div></div>
+    <div class="ps"><div class="pn">7a</div><div class="pc"><h4 class="section">Signature de la promesse d'achat</h4><p>Signée par BAT Investissement — jamais par Cédric</p></div></div>
+    <div class="ps"><div class="pn">7b</div><div class="pc"><h4 class="section">Pré-commercialisation des lots</h4><p>Après offre acceptée + après signature vendeur. Cibles : particuliers voulant construire + constructeurs individuels</p></div></div>
+  </div>
+
+  <div class="card">
+    <h3>Process Division — Délais réels (FT-MDB-035 LI)</h3>
+    <p style="font-size:11px;color:#888;margin-bottom:10px">C'est le géomètre qui dépose — toi tu transmets les documents à LI.</p>
+    <div style="margin-bottom:12px;padding:10px 12px;background:#f0f9f4;border:1px solid #86efac;border-radius:7px;font-size:11px;color:#166534">
+      <strong>✅ Règle clé :</strong> Si maison existante conservée → <strong>pas de DP/PA obligatoire</strong> — juste division cadastrale géomètre (plus rapide, moins cher). DP requis uniquement si création voirie/espaces communs.
+    </div>
+    <div style="margin-bottom:12px;padding:10px 12px;background:#fafaf9;border:1px solid #e5e4de;border-radius:7px;font-size:11px">
+      <strong>Planning total minimum après compromis : 4 à 6 mois</strong><br>
+      Analyse PLU + mairie : 1-2 sem · Mairie/ABF : 1 mois · Montage dossier : 2-3 sem · Instruction : 1-3 mois · Affichage + recours : 2 mois obligatoires
+    </div>
+    <div class="ps"><div class="pn">1</div><div class="pc"><h4 class="section">Offre acceptée sur projet TAB</h4></div></div>
+    <div class="ps"><div class="pn">2</div><div class="pc"><h4 class="section">Devis 3 géomètres — choisir le moins cher</h4></div></div>
+    <div class="ps"><div class="pn">3</div><div class="pc"><h4 class="section">Validation du devis</h4></div></div>
+    <div class="ps"><div class="pn">4</div><div class="pc"><h4 class="section">Géomètre dépose la demande en mairie</h4><p>⚠️ Transmettre le récépissé à Link Invests</p></div></div>
+    <div class="ps"><div class="pn">5a</div><div class="pc"><h4 class="section">Réception de l'arrêté — 1 mois max</h4><p>Reçu et transmis au notaire par LI</p></div></div>
+    <div class="ps"><div class="pn">5b</div><div class="pc"><h4 class="section">Pièces complémentaires éventuelles</h4><p>1 mois de délai supplémentaire possible</p></div></div>
+    <div class="ps"><div class="pn">6</div><div class="pc"><h4 class="section">Affichage panneau en bordure de parcelle</h4><p>Obligatoire — panneau visible depuis la voie publique</p></div></div>
+    <div class="ps"><div class="pn">7</div><div class="pc"><h4 class="section">Constat d'affichage par commissaire de justice</h4><p>⚠️ Transmettre les constats à Link Invests</p></div></div>
+    <div class="ps"><div class="pn">8</div><div class="pc"><h4 class="section">Si pas de recours → acte authentique</h4><p>Délai recours : 2 mois obligatoires après affichage — <strong>anticiper dès la visite</strong></p></div></div>
+  </div>
+
+  <div class="card">
+    <h3>Dates clés à suivre</h3>
+    <div class="r2">
+      <div><span class="lbl">Date offre acceptée</span><input type="date" id="f_date_offre_ok" onchange="autoSave()"></div>
+      <div><span class="lbl">Date compromis prévu</span><input type="date" id="f_date_compromis" onchange="autoSave()"></div>
+    </div>
+    <div class="r2">
+      <div><span class="lbl">Date acte authentique prévu</span><input type="date" id="f_date_acte" onchange="autoSave()"></div>
+      <div><span class="lbl">Date fin recours DP (2 mois après affichage)</span><input type="date" id="f_date_recours" onchange="autoSave()"></div>
+    </div>
+    <p style="font-size:11px;color:#aaa;margin-top:6px">Ces dates sont gérées par LI et le notaire — note-les ici pour suivre le calendrier.</p>
+  </div>
+
+  <div class="card">
+    <h3>Checklist post-acceptation</h3>
+    <ul class="cl">
+      <li><input type="checkbox"><label>Offre envoyée à LI — signée BAT Investissement</label></li>
+      <li><input type="checkbox"><label>Croquis prévisionnel de division établi</label></li>
+      <li><input type="checkbox"><label>Devis 3 géomètres demandés</label></li>
+      <li><input type="checkbox"><label>CU-b demandé en mairie</label></li>
+      <li><input type="checkbox"><label>Dossier administratif monté</label></li>
+      <li><input type="checkbox"><label>Estimation revente lots confirmée par agent</label></li>
+      <li>
+        <input type="checkbox">
+        <div>
+          <div style="font-size:13px">Pré-commercialisation des lots lancée</div>
+          <div style="font-size:11px;color:#888;margin-top:2px">Uniquement après compromis signé. Ne jamais annoncer la division publiquement avant — risque que le vendeur se rétracte ou monte le prix.</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- T10 RÈGLES & DVF -->
+<div id="t10" class="screen">
+
+  <div class="card">
+    <h3>Règles d'or Link Invests</h3>
+    <div class="r2" style="gap:8px">
+      <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:9px;padding:10px">
+        <div style="font-weight:600;color:#dc2626;margin-bottom:4px">❌ JAMAIS mentionner la division</div>
+        <div style="font-size:11px;color:#666">"Grand terrain" uniquement — division = agent monte le prix</div>
+      </div>
+      <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:9px;padding:10px">
+        <div style="font-weight:600;color:#166534;margin-bottom:4px">✅ "Marchand de biens" uniquement</div>
+        <div style="font-size:11px;color:#666">LI reste confidentiel — toujours. Dire "réseau professionnel" si demandé</div>
+      </div>
+      <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:9px;padding:10px">
+        <div style="font-weight:600;color:#dc2626;margin-bottom:4px">❌ JAMAIS offre sans GO comité LI</div>
+        <div style="font-size:11px;color:#666">Offre soumise par BAT Investissement uniquement — jamais par toi</div>
+      </div>
+      <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:9px;padding:10px">
+        <div style="font-weight:600;color:#166534;margin-bottom:4px">✅ PLU zone U avant tout déplacement</div>
+        <div style="font-size:11px;color:#666">geoportail-urbanisme.gouv.fr — obligatoire avant chaque visite</div>
+      </div>
+      <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:9px;padding:10px">
+        <div style="font-weight:600;color:#dc2626;margin-bottom:4px">❌ JAMAIS prix annonces pour la marge</div>
+        <div style="font-size:11px;color:#666">DVF notaires.fr fourchette basse — toujours. Jamais LBC/Castorus pour calculer</div>
+      </div>
+      <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:9px;padding:10px">
+        <div style="font-weight:600;color:#166534;margin-bottom:4px">✅ Pessimiste ≥ 20% = seule décision GO</div>
+        <div style="font-size:11px;color:#666">Réaliste + optimiste = lives LI seulement. 25-30% recommandé si DP complexe</div>
+      </div>
+      <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:9px;padding:10px">
+        <div style="font-weight:600;color:#dc2626;margin-bottom:4px">❌ JAMAIS 2 offres en parallèle</div>
+        <div style="font-size:11px;color:#666">1 seule offre à la fois — tu peux étudier plusieurs biens en parallèle</div>
+      </div>
+      <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:9px;padding:10px">
+        <div style="font-weight:600;color:#166534;margin-bottom:4px">✅ On achète sur un chiffre, pas un feeling</div>
+        <div style="font-size:11px;color:#666">Règle d'or LI</div>
+      </div>
+      <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:9px;padding:10px">
+        <div style="font-weight:600;color:#dc2626;margin-bottom:4px">❌ JAMAIS sous-estimer les travaux</div>
+        <div style="font-size:11px;color:#666">Mieux vaut sur-estimer. Aléa 5-10% obligatoire. Si doute → STOP</div>
+      </div>
+      <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:9px;padding:10px">
+        <div style="font-weight:600;color:#166534;margin-bottom:4px">✅ 5 sources pour valider les prix</div>
+        <div style="font-size:11px;color:#666">DVF + MeilleursAgents + Castorus + LBC annonces actives + Pappers Immobilier</div>
+      </div>
+      <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:9px;padding:10px">
+        <div style="font-weight:600;color:#dc2626;margin-bottom:4px">❌ JAMAIS bien sans difficulté vendeur</div>
+        <div style="font-size:11px;color:#666">Bien au prix + contexte facile = pas pour nous. On cherche les situations compliquées</div>
+      </div>
+      <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:9px;padding:10px">
+        <div style="font-weight:600;color:#dc2626;margin-bottom:4px">❌ JAMAIS annoncer la division avant compromis</div>
+        <div style="font-size:11px;color:#666">Vendeur peut se rétracter ou monter le prix — division reste confidentielle jusqu'à la signature</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>DVF par zone — notaires.fr mars 2026</h3>
+    <div style="background:#fdf8ec;border:1px solid #f0d98a;border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:11px;color:#7a5500">
+      ⚠️ Ces données sont à remettre à jour <strong>une fois par an</strong> sur notaires.fr — prochaine mise à jour : <strong>mars 2027</strong>
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead><tr style="background:#f0efe9">
+        <th style="padding:8px;text-align:left;border-bottom:2px solid #ddd">Zone</th>
+        <th style="padding:8px;text-align:left;border-bottom:2px solid #ddd">DVF terrain</th>
+        <th style="padding:8px;text-align:left;border-bottom:2px solid #ddd">Bâti médian</th>
+        <th style="padding:8px;text-align:left;border-bottom:2px solid #ddd">Marché</th>
+        <th style="padding:8px;text-align:left;border-bottom:2px solid #ddd">Délai</th>
+        <th style="padding:8px;text-align:left;border-bottom:2px solid #ddd">Priorité</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #f0efe9"><td style="padding:8px"><strong>Changé (53810)</strong></td><td style="padding:8px"><strong>115€/m²</strong><br><small style="color:#888">108-183 — 27 ventes</small></td><td style="padding:8px">2 155-2 307€/m²</td><td style="padding:8px">LIQUIDE</td><td style="padding:8px">30-60j</td><td style="padding:8px">★★★ Priorité 1</td></tr>
+        <tr style="border-bottom:1px solid #f0efe9;background:#fafaf9"><td style="padding:8px"><strong>Vitré (35500)</strong></td><td style="padding:8px"><strong>126€/m²</strong> pessimiste<br><small style="color:#888">médiane 174 — 43 ventes — utiliser 126 (fourchette basse)</small></td><td style="padding:8px">2 488-2 500€/m²</td><td style="padding:8px">LIQUIDE</td><td style="padding:8px">30-60j</td><td style="padding:8px">★★★ Priorité 1</td></tr>
+        <tr style="border-bottom:1px solid #f0efe9"><td style="padding:8px"><strong>Bonchamp (53960)</strong></td><td style="padding:8px">proxy 115€/m²<br><small style="color:#888">DVF indispo — 98 ventes bâti</small></td><td style="padding:8px">~2 088€/m²</td><td style="padding:8px">LIQUIDE FORT</td><td style="padding:8px">30-60j</td><td style="padding:8px">★★ Meilleur profil couronne</td></tr>
+        <tr style="border-bottom:1px solid #f0efe9;background:#fafaf9"><td style="padding:8px"><strong>L'Huisserie (53970)</strong></td><td style="padding:8px">proxy 115€/m²<br><small style="color:#888">DVF indispo — 58 ventes bâti</small></td><td style="padding:8px">2 055-2 107€/m²</td><td style="padding:8px">LIQUIDE FORT</td><td style="padding:8px">&lt;60j 63%</td><td style="padding:8px">★★ +10% population</td></tr>
+        <tr style="border-bottom:1px solid #f0efe9"><td style="padding:8px"><strong>Saint-Berthevin (53940)</strong></td><td style="padding:8px">proxy 115€/m²<br><small style="color:#888">DVF indispo — 114 ventes bâti</small></td><td style="padding:8px">~2 098€/m²</td><td style="padding:8px">LIQUIDE</td><td style="padding:8px">30-60j</td><td style="padding:8px">★★ Priorité 2</td></tr>
+        <tr><td style="padding:8px"><strong>Fougères (35300)</strong></td><td style="padding:8px"><strong>126€/m²</strong> pessimiste<br><small style="color:#888">médiane 164 — 25 ventes — ciseau !</small></td><td style="padding:8px">1 707-1 894€/m²</td><td style="padding:8px">MOYEN</td><td style="padding:8px">60-120j</td><td style="padding:8px">★ Dernier recours</td></tr>
+      </tbody>
+    </table>
+    <div class="hl" style="margin-top:10px">Règle DVF : Toujours fourchette BASSE pour le pessimiste. DVF notaires.fr = transactions réelles. Jamais les prix annonces LBC/Castorus.</div>
+  </div>
+
+  <div class="card">
+    <h3>Décotes travaux</h3>
+    <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead><tr style="background:#f0efe9">
+        <th style="padding:8px;text-align:left;border-bottom:2px solid #ddd">Type</th>
+        <th style="padding:8px;text-align:left;border-bottom:2px solid #ddd">Décote</th>
+        <th style="padding:8px;text-align:left;border-bottom:2px solid #ddd">Action</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #f0efe9"><td style="padding:8px">Rafraîchissement simple</td><td style="padding:8px">-10 à -15%</td><td style="padding:8px"><span style="background:#dcfce7;color:#166534;padding:3px 8px;border-radius:6px;font-size:11px">OK — vendu en l'état</span></td></tr>
+        <tr style="border-bottom:1px solid #f0efe9;background:#fafaf9"><td style="padding:8px">Rénovation légère (~800€/m²)</td><td style="padding:8px">-15 à -25%</td><td style="padding:8px"><span style="background:#fef9c3;color:#713f12;padding:3px 8px;border-radius:6px;font-size:11px">À chiffrer — coût ~800€/m²</span></td></tr>
+        <tr><td style="padding:8px">Grosse rénovation / démolition</td><td style="padding:8px">-30%+</td><td style="padding:8px"><span style="background:#fee2e2;color:#dc2626;padding:3px 8px;border-radius:6px;font-size:11px">STOP</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Cibles de revente</h3>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="padding:10px;background:#f0fdf4;border-radius:8px;border-left:3px solid #166534">
+        <div style="font-weight:600;font-size:13px">Terrain à bâtir (TAB)</div>
+        <div style="font-size:11px;color:#666;margin-top:3px">Particulier voulant construire sa maison — acheteur principal de ta zone Laval/Vitré</div>
+      </div>
+      <div style="padding:10px;background:#eff6ff;border-radius:8px;border-left:3px solid #1e40af">
+        <div style="font-weight:600;font-size:13px">Maison existante en l'état</div>
+        <div style="font-size:11px;color:#666;margin-top:3px">Famille cherchant à acheter — vendue directement sans travaux</div>
+      </div>
+      <div style="padding:10px;background:#fefce8;border-radius:8px;border-left:3px solid #ca8a04">
+        <div style="font-weight:600;font-size:13px">Constructeur individuel</div>
+        <div style="font-size:11px;color:#666;margin-top:3px">Achète plusieurs TAB — prix légèrement inférieur mais vente rapide et sécurisée</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div id="t11" class="screen">
+
+  <!-- TABLEAU DE BORD -->
+  <div class="card">
+    <h3>Tableau de bord</h3>
+    <div class="m4" id="dash"></div>
+    <p style="font-size:11px;color:#aaa;text-align:center;margin-top:6px">Objectif : 1 bien viable pour 15–20 annonces analysées</p>
+  </div>
+
+  <!-- BILAN SEMAINE -->
+  <div class="card">
+    <h3>📊 Bilan semaine</h3>
+    <p style="font-size:11px;color:#888;margin-bottom:12px">À remplir chaque vendredi 17h. Remet les compteurs à zéro chaque lundi.</p>
+    <div class="r2" style="gap:10px">
+      <div>
+        <span class="lbl">Annonces analysées cette semaine</span>
+        <input type="number" id="h_annonces" placeholder="0" oninput="autoSave()" min="0">
+      </div>
+      <div>
+        <span class="lbl">Appels agents passés</span>
+        <input type="number" id="h_appels" placeholder="0" oninput="autoSave()" min="0">
+      </div>
+      <div>
+        <span class="lbl">GO pré-calcul obtenus</span>
+        <input type="number" id="h_go" placeholder="0" oninput="autoSave()" min="0">
+      </div>
+      <div>
+        <span class="lbl">Visites planifiées</span>
+        <input type="number" id="h_visites" placeholder="0" oninput="autoSave()" min="0">
+      </div>
+    </div>
+    <div style="margin-top:10px">
+      <span class="lbl">Notes bilan / points bloquants</span>
+      <textarea id="h_notes_bilan" rows="2" placeholder="Ex: agents peu réactifs sur Vitré, 2 GO en attente PLU..." oninput="autoSave()" style="resize:vertical"></textarea>
+    </div>
+  </div>
+
+  <!-- RENDEZ-VOUS -->
+  <div class="card">
+    <h3>📅 Rendez-vous à venir</h3>
+    <p style="font-size:11px;color:#888;margin-bottom:10px">Note tes visites, lives LI et appels importants planifiés.</p>
+    <div id="rdv_list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
+      <div style="flex:1;min-width:120px">
+        <span class="lbl">Date</span>
+        <input type="date" id="rdv_date">
+      </div>
+      <div style="flex:1;min-width:80px">
+        <span class="lbl">Heure</span>
+        <input type="time" id="rdv_heure" placeholder="09:30">
+      </div>
+      <div style="flex:2;min-width:160px">
+        <span class="lbl">Description</span>
+        <input type="text" id="rdv_desc" placeholder="Ex: Visite Vitré / Live LI Urbanisme...">
+      </div>
+      <button class="btn btn-sm" onclick="addRdv()" style="margin-bottom:1px">+ Ajouter</button>
+    </div>
+  </div>
+
+  <!-- TOUS LES BIENS -->
+  <div class="card">
+    <h3>Tous les biens analysés</h3>
+    <div id="hist_list"><p style="color:#aaa;font-size:12px">Aucun bien enregistré.</p></div>
+  </div>
+
+  <!-- PLANNING -->
+  <div class="card">
+    <h3>🗓️ Planning 2026 — Objectif premier deal</h3>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px">
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;background:#f8f7f4;border-left:4px solid #1a1a1a">
+        <span style="font-size:18px">✅</span>
+        <div style="flex:1"><div style="font-size:13px;font-weight:600">Fév–Mars 2026 — Formation + Organisation</div><div style="font-size:11px;color:#888;margin-top:2px">GPS MDB finalisé · Analyse marché 6 zones · Lundi 23/03 : premiers appels agents</div></div>
+        <span style="font-size:11px;color:#888;white-space:nowrap">Fév–Mars</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;background:#eff6ff;border-left:4px solid #1e40af">
+        <span style="font-size:18px">📞</span>
+        <div style="flex:1"><div style="font-size:13px;font-weight:600">Mars–Avril — Sourcing intensif</div><div style="font-size:11px;color:#666;margin-top:2px">10 appels agents/semaine · Plateformes quotidiennes · 1 visite pour 15-20 annonces analysées</div></div>
+        <span style="font-size:11px;color:#1e40af;white-space:nowrap;font-weight:600">EN COURS</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;background:#f0fdf4;border-left:4px solid #166534">
+        <span style="font-size:18px">🏠</span>
+        <div style="flex:1"><div style="font-size:13px;font-weight:600">Avril–Mai — Visites terrain</div><div style="font-size:11px;color:#666;margin-top:2px">Visite · Marge 3 scénarios · Dossier Drive · Service urbanisme mairie</div></div>
+        <span style="font-size:11px;color:#888;white-space:nowrap">Avr–Mai</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;background:#fefce8;border-left:4px solid #ca8a04">
+        <span style="font-size:18px">🎯</span>
+        <div style="flex:1"><div style="font-size:13px;font-weight:600">Juin — Lives LI + Soumission comité</div><div style="font-size:11px;color:#666;margin-top:2px">Live Urbanisme → Live Sourcing → Live Négociation · Google Forms soumission</div></div>
+        <span style="font-size:11px;color:#ca8a04;white-space:nowrap;font-weight:600">OBJECTIF</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;background:#fef2f2;border-left:4px solid #dc2626">
+        <span style="font-size:18px">🏖️</span>
+        <div style="flex:1"><div style="font-size:13px;font-weight:600">Pause Sardaigne</div><div style="font-size:11px;color:#666;margin-top:2px">25 juin → 3 août — non comptée dans le contrat LI</div></div>
+        <span style="font-size:11px;color:#888;white-space:nowrap">25 juin–3 août</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;background:#f5f3ff;border-left:4px solid #7c3aed">
+        <span style="font-size:18px">✍️</span>
+        <div style="flex:1"><div style="font-size:13px;font-weight:600">Septembre — Offre d'achat</div><div style="font-size:11px;color:#666;margin-top:2px">Présentation en direct vendeurs + agent · BAT Investissement signe</div></div>
+        <span style="font-size:11px;color:#888;white-space:nowrap">Sept</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;background:#fff7ed;border-left:4px solid #ea580c">
+        <span style="font-size:18px">📝</span>
+        <div style="flex:1"><div style="font-size:13px;font-weight:600">Octobre — Compromis de vente</div><div style="font-size:11px;color:#666;margin-top:2px">Géomètre · CU-b · DP division · Pré-commercialisation lots</div></div>
+        <span style="font-size:11px;color:#888;white-space:nowrap">Oct</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;background:#1a1a1a">
+        <span style="font-size:18px">🏆</span>
+        <div style="flex:1"><div style="font-size:13px;font-weight:600;color:#fff">~17 déc. 2026 — Fin contrat LI</div><div style="font-size:11px;color:#aaa;margin-top:2px">Objectif : 100 000€ net · Premier deal bouclé</div></div>
+        <span style="font-size:12px;color:#fbbf24;white-space:nowrap;font-weight:700">100k€</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+
+<script>
+var curId=null,lots=[],lotCnt=0,lotDisplayNum=0;
+function ST(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.classList.remove('active');
+    if(t.getAttribute('data-target')===id){
+      t.classList.add('active');
+    }
+  });
+  var el=document.getElementById(id);
+  if(el){el.classList.add('active');}
+  if(id==='t7'){setTimeout(syncLive,100);}
+}
+function GB(){try{return JSON.parse(localStorage.getItem('mdb_v3')||'{}')}catch(e){return{}}}
+function SB(b){localStorage.setItem('mdb_v3',JSON.stringify(b))}
+function refreshSel(){
+  var s=document.getElementById('b_sel'),b=GB(),k=Object.keys(b);
+  s.innerHTML='<option value="">— Sélectionner un bien —</option>';
+  k.forEach(function(id){var o=document.createElement('option');o.value=id;o.textContent=b[id].ref||id;if(id===curId)o.selected=true;s.appendChild(o)});
+}
+function newBien(){
+  var ref=prompt('Référence du bien (ex: 12 rue des Lilas Vitré):');
+  if(!ref)return;
+  var id='b'+Date.now(),b=GB();
+  b[id]={ref:ref,created:new Date().toLocaleDateString('fr-FR')};
+  SB(b);curId=id;clearForm();refreshSel();
+  document.getElementById('b_sel').value=id;
+}
+function loadBien(){
+  var id=document.getElementById('b_sel').value;
+  if(!id){curId=null;clearForm();return;}
+  curId=id;var b=GB(),d=b[id]||{};
+  var fs=['lien','prix','date','sm','st','st_maison','nlots_manual','prix_maison_manuel','zone','etat_bien','type','agent','nego_pct','adresse','duree','motif','contraintes','taxe_fonc','travaux_detail','compteurs','assainis','notes_appel','drive','lien_excel','marge_post_visite','v_nego','v_offres','v_coords','v_enviro','v_bati','v_sol','v_assainis','v_voirie','outil_pres','forms_comite','offre','doff','nego','date_offre_ok','date_compromis','date_acte','date_recours','lk_l1_plu','lk_l1_cadastre','lk_l1_croquis','lk_l1_voirie','lk_l1_mairie','lk_l1_photos','lk_l2_excel','lk_l2_dvf','lk_l2_castorus','lk_l2_ma','lk_l2_photos','lk_l3_offre','lk_l3_args','lk_l3_vendeur','lk_l3_agent'];
+  fs.forEach(function(f){var el=document.getElementById('f_'+f);if(el)el.value=d[f]||''});
+  ['m_prix','m_not','m_geo','m_tfon','m_trav','m_tax','m_alea','m_fagence'].forEach(function(f){var el=document.getElementById(f);if(el)el.value=d[f]||(f==='m_alea'?'5':f==='m_fagence'?'5':'')});
+  ['s1','s2','s3','s4','s5','s6'].forEach(function(f){var el=document.getElementById(f);if(el)el.checked=!!d[f]});
+  document.getElementById('lots_c').innerHTML='';lots=[];lotCnt=0;
+  if(d.lots&&d.lots.length){d.lots.forEach(function(l){addLotD(l)})}else{addLot();addLot()}
+  calcPre();calcMarge();
+}
+function saveBien(){
+  if(!curId){alert('Créer un bien d\'abord.');return;}
+  var b=GB(),d=b[curId]||{};
+  var fs=['lien','prix','date','sm','st','st_maison','nlots_manual','prix_maison_manuel','zone','etat_bien','type','agent','nego_pct','adresse','duree','motif','contraintes','taxe_fonc','travaux_detail','compteurs','assainis','notes_appel','drive','lien_excel','marge_post_visite','v_nego','v_offres','v_coords','v_enviro','v_bati','v_sol','v_assainis','v_voirie','outil_pres','forms_comite','offre','doff','nego','date_offre_ok','date_compromis','date_acte','date_recours','lk_l1_plu','lk_l1_cadastre','lk_l1_croquis','lk_l1_voirie','lk_l1_mairie','lk_l1_photos','lk_l2_excel','lk_l2_dvf','lk_l2_castorus','lk_l2_ma','lk_l2_photos','lk_l3_offre','lk_l3_args','lk_l3_vendeur','lk_l3_agent'];
+  fs.forEach(function(f){var el=document.getElementById('f_'+f);if(el)d[f]=el.value});
+  ['m_prix','m_not','m_geo','m_tfon','m_trav','m_tax','m_alea','m_fagence'].forEach(function(f){var el=document.getElementById(f);if(el)d[f]=el.value});
+  ['s1','s2','s3','s4','s5','s6'].forEach(function(f){var el=document.getElementById(f);if(el)d[f]=el.checked});
+  d.lots=getLSave();
+  var px=parseFloat(d.prix)||0,st=parseFloat(d.st)||0,sm=parseFloat(d.sm)||0,dvf=parseInt(d.zone)||0;
+  var stm=parseFloat(d.st_maison)||0;
+  var surf_div=stm>0?Math.max(st-stm,0):Math.max(st-sm-200,0);
+  var nl=Math.max(Math.floor(surf_div/450),1);
+  var surf_lot=nl>0&&surf_div>0?Math.max(Math.round(surf_div/nl),300):450;
+  var rev=nl*surf_lot*dvf+(sm>0?sm*2400:100000);
+  var mg=px>0?((rev-px)/rev*100):0;
+  d.marge_pre=mg.toFixed(1);d.statut=mg>=20?'GO':'STOP';
+  b[curId]=d;SB(b);
+  var btn=document.querySelector('.btn-save');if(btn){var orig=btn.innerHTML;btn.innerHTML='✓ Sauvegardé';btn.style.opacity='0.7';setTimeout(function(){btn.innerHTML=orig;btn.style.opacity='1';},1500);}
+  refreshSel();
+}
+function autoSave(){if(curId){saveBien();syncLive();if(typeof refreshSlides==='function')refreshSlides();}}
+
+function checkSPANC(){
+  var v = (document.getElementById('f_assainis')||{value:''}).value.toLowerCase();
+  var alert = document.getElementById('spanc_alert');
+  if(!alert) return;
+  alert.style.display = (v.indexOf('fosse') !== -1) ? 'block' : 'none';
+}
+function deleteBien(){
+  if(!curId)return;
+  if(!confirm('Supprimer ce bien ?'))return;
+  var b=GB();delete b[curId];SB(b);curId=null;clearForm();refreshSel();
+}
+function clearForm(){
+  var fs=['lien','prix','date','sm','st','st_maison','nlots_manual','prix_maison_manuel','zone','etat_bien','type','agent','nego_pct','adresse','duree','motif','contraintes','taxe_fonc','travaux_detail','compteurs','assainis','notes_appel','drive','lien_excel','marge_post_visite','v_nego','v_offres','v_coords','v_enviro','v_bati','v_sol','v_assainis','v_voirie','outil_pres','forms_comite','offre','doff','nego','date_offre_ok','date_compromis','date_acte','date_recours','lk_l1_plu','lk_l1_cadastre','lk_l1_croquis','lk_l1_voirie','lk_l1_mairie','lk_l1_photos','lk_l2_excel','lk_l2_dvf','lk_l2_castorus','lk_l2_ma','lk_l2_photos','lk_l3_offre','lk_l3_args','lk_l3_vendeur','lk_l3_agent'];
+  fs.forEach(function(f){var el=document.getElementById('f_'+f);if(el)el.value=''});
+  ['m_prix','m_not','m_geo','m_tfon','m_trav','m_tax','m_alea','m_fagence'].forEach(function(f){var el=document.getElementById(f);if(el)el.value=(f==='m_alea'||f==='m_fagence')?'5':''});
+  ['s1','s2','s3','s4','s5','s6'].forEach(function(f){var el=document.getElementById(f);if(el)el.checked=false});
+  ['age_r','pre_r','calc_r'].forEach(function(id){var el=document.getElementById(id);if(el)el.innerHTML=''});
+  document.getElementById('lots_c').innerHTML='';lots=[];lotCnt=0;lotDisplayNum=0;addLot();addLot();calcMarge();
+}
+// DVF terrain et prix m² bâti par zone — données réelles analyse marché 18/03/2026
+// Sources : notaires.fr DVF + Ville à Vivre + Castorus + LBC
+var ZONES={
+  // Changé : DVF 115€/m² (27 ventes) — bâti médian 2155-2307€/m² — marché LIQUIDE 30-60j
+  '115':  {dvf:115, bati:2230, batiFourchette:'2 155-2 307', dvfFourchette:'108-183',
+           ventes:27, delai:'30-60 jours', marche:'LIQUIDE ★★★',
+           neuf:270000, budgetTerrain:85000, lotMax:700,
+           note:'Priorité absolue. Acquéreur : couples 30-50 ans propriétaires.',
+           vigilance:'Vérifier PLUi Laval Agglo — zone U obligatoire'},
+
+  // Vitré : DVF 174€/m² (43 ventes) — MAIS utiliser 126€/m² pessimiste (fourchette basse)
+  // bâti médian 2488-2500€/m² — marché LIQUIDE 30-60j
+  '126':  {dvf:126, bati:2490, batiFourchette:'2 488-2 500', dvfFourchette:'150-217',
+           ventes:43, delai:'30-60 jours', marche:'LIQUIDE ★★★',
+           neuf:300000, budgetTerrain:100000, lotMax:600,
+           note:'⚠️ DVF médiane 174€/m² MAIS calcul pessimiste = 126€/m² (fourchette basse). Périphérie uniquement.',
+           vigilance:'Cibler périphérie — pas centre-ville dense (40% locataires). 220 annonces actives = concurrence.'},
+
+  // Fougères : DVF 164€/m² médiane — utiliser 126€/m² pessimiste (fourchette basse — ciseau)
+  // bâti médian 1707€/m² — marché LENT 60-120j — DERNIER RECOURS
+  '126f': {dvf:126, bati:1800, batiFourchette:'1 707-1 894', dvfFourchette:'126-204',
+           ventes:25, delai:'60-120 jours', marche:'MOYEN ★ DERNIER RECOURS',
+           neuf:240000, budgetTerrain:70000, lotMax:500,
+           note:'⚠️ DERNIER RECOURS. DVF médiane 164€/m² mais utiliser 126€/m² (fourchette basse) — ciseau terrain/marché.',
+           vigilance:'Pop. -0.54% — chômage 11.71% — baisses Castorus -28%. Négociation serrée obligatoire. Lot max 500m² / prix max 70k€.'},
+
+  // Saint-Berthevin : DVF indispo — proxy Changé 115€/m² — bâti 2098€/m² (114 ventes)
+  '115sb':{dvf:115, bati:2098, batiFourchette:'~2 098', dvfFourchette:'proxy Changé',
+           ventes:114, delai:'30-60 jours', marche:'LIQUIDE ★★ OPPORTUNISTE',
+           neuf:260000, budgetTerrain:85000, lotMax:700,
+           note:'⚠️ DVF terrain indisponible — proxy Changé 115€/m². Commune saturée côté Ouest Laval.',
+           vigilance:'Valider DVF sur app.dvf.etalab.gouv.fr parcelle par parcelle si bien trouvé.'},
+
+  // Bonchamp : DVF indispo — proxy Changé 115€/m² — bâti 2088€/m² (98 ventes)
+  // Meilleur profil acquéreur de la couronne : 34.7% couples avec enfants, 95.4% maisons
+  '115bo':{dvf:115, bati:2088, batiFourchette:'~2 088', dvfFourchette:'proxy Changé',
+           ventes:98, delai:'30-60 jours', marche:'LIQUIDE FORT ★★ OPPORTUNISTE',
+           neuf:245000, budgetTerrain:85000, lotMax:700,
+           note:'✅ MEILLEUR profil acquéreur couronne Laval : 34.7% couples enfants, 95.4% maisons. Si bien trouvé ici = priorité.',
+           vigilance:'DVF terrain indisponible — proxy 115€/m². Annonces LBC terrain à 145-186€/m² suggèrent marché au-dessus du proxy.'},
+
+  // L'Huisserie : DVF indispo — proxy Changé 115€/m² — bâti 2055-2107€/m² (58 ventes)
+  // +10.08% population = meilleure croissance du périmètre
+  '115lh':{dvf:115, bati:2080, batiFourchette:'2 055-2 107', dvfFourchette:'proxy Changé',
+           ventes:58, delai:'< 60 jours (63%)', marche:'LIQUIDE FORT ★★ OPPORTUNISTE',
+           neuf:227000, budgetTerrain:70000, lotMax:600,
+           note:'⚠️ +10.08% population = meilleure croissance du périmètre. Mais neuf à 227k€ = plafond bas.',
+           vigilance:'Lot nu MAX 70 000€ — plafond neuf très bas (227k€). Ne pas dépasser sinon sortie ne tient plus.'}
+};
+function getZone(){
+  var v=document.getElementById('f_zone').value;
+  return ZONES[v]||null;
+}
+function getDvf(){var z=getZone();return z?z.dvf:0}
+
+function showNegoHint(){
+  var el=document.getElementById('nego_hint');
+  if(!el)return;
+  var etat=parseFloat((document.getElementById('f_etat_bien')||{}).value)||0;
+  var hints={
+    0:   null,
+    0.12:'Rafraîchissement → fourchette typique <strong>10–15%</strong> · À affiner après appel agent',
+    0.20:'Rénovation légère → fourchette typique <strong>15–20%</strong> · À affiner après appel agent',
+    0.30:'Grosse rénovation → fourchette typique <strong>20–30%</strong> · À affiner après appel agent'
+  };
+  var msg=hints[etat];
+  if(msg){el.innerHTML='💡 '+msg;el.style.display='block';}
+  else{el.innerHTML='';el.style.display='none';}
+}
+
+function checkAge(){
+  var d=document.getElementById('f_date').value;if(!d)return;
+  var mo=Math.floor((new Date()-new Date(d))/(1000*60*60*24*30));
+  var _ar=document.getElementById('age_r');if(_ar)_ar.innerHTML=mo>=6?'<span class="tag tg">En vente '+mo+' mois — critère soumission LI OK</span>':
+    mo>=3?'<span class="tag tw">En vente '+mo+' mois — bon signal (pas encore critère 6 mois LI)</span>':'<span class="tag ts">En vente '+mo+' mois — récent</span>';
+}
+
+function calcPre(){
+  var px=parseFloat(document.getElementById('f_prix').value)||0;
+  var st=parseFloat(document.getElementById('f_st').value)||0;
+  var sm=parseFloat(document.getElementById('f_sm').value)||0;
+  var zone=getZone();
+  var r=document.getElementById('pre_r');
+  if(!r)return;
+  if(!px||!st){r.innerHTML='';return}
+  if(st<1200){r.innerHTML='<div class="rb warn"><div class="rl">⚠️ Terrain '+st+' m² — objectif 100k net recommande ≥ 1 500 m² divisible</div></div>';return;}
+  if(!zone){r.innerHTML='<div class="rb warn"><div class="rl">Sélectionner la zone pour calculer</div></div>';return}
+  var dvf=zone.dvf, bati=zone.bati;
+  var stM=parseFloat((document.getElementById('f_st_maison')||{}).value)||0;
+  var td=stM>0?Math.max(st-stM,0):Math.max(st-sm-200,0);
+  var nlS=parseFloat((document.getElementById('f_nlots_manual')||{}).value)||parseFloat((document.getElementById('f_nlots')||{}).value)||0;
+  var nl=nlS>0?nlS:Math.max(Math.floor(td/600),1);
+  var surfLot=Math.round(td/nl);
+  var revT=nl*surfLot*dvf;
+  var dec=parseFloat((document.getElementById('f_etat_bien')||{}).value)||0;
+  var dec_pess = dec > 0 ? Math.min(dec + 0.03, 0.25) : 0;
+  var revM=sm>0?Math.round(sm*bati*(1-dec_pess)):100000;
+  var rev=revT+revM;
+  document.getElementById('f_tdiv').value=Math.round(td);
+  document.getElementById('f_nlots').value=nl;
+  document.getElementById('f_pmaison').value=Math.round(revM);
+  document.getElementById('m_prix').value=px;
+  document.getElementById('m_not').value=Math.round(px*0.03);
+  var mg=geo=document.getElementById('m_geo');if(mg&&!mg.value)mg.value=2500;
+  var tf=document.getElementById('m_tfon');if(tf&&!tf.value)tf.value=700;
+  var al=document.getElementById('m_alea');if(al&&!al.value)al.value=5;
+  var fa=document.getElementById('m_fagence');if(fa&&!fa.value)fa.value=5;
+  var eb=document.getElementById('f_etat_bien'),me=document.getElementById('m_etat');
+  if(eb&&me)me.value=eb.value;
+  calcComplet();
+  var np=parseFloat((document.getElementById('f_nego_pct')||{}).value)||0;
+  var pxN=px*(1-np/100);
+  var mgP=px>0?(rev-px)/rev*100:0;
+  var mgN=pxN>0?(rev-pxN)/rev*100:0;
+  var pxMax=Math.round(rev*0.8);
+  var rem=Math.round((1-pxMax/px)*100);
+  var cls=mgP>=20?'go':mgP>=15?'warn':'stop';
+  var html='<div class="rb '+cls+'"><div class="rl">'+(mgP>=20?'GO au prix affiché':mgP>=15?'Limite':'STOP au prix affiché')+'</div>';
+  html+='<div class="rn">Marge prix affiché : <strong>'+mgP.toFixed(1)+'%</strong></div>';
+  if(np>0){
+    var cN=mgN>=20?'go':mgN>=15?'warn':'stop';
+    html+='<div style="margin-top:5px;padding-top:5px;border-top:1px solid rgba(0,0,0,.1)">';
+    html+='<div class="rn" style="font-weight:600;color:var(--'+cN+')">'+(mgN>=20?'✅ GO':mgN>=15?'⚠️ Limite':'❌ STOP')+' après -'+np+'%</div>';
+    html+='<div class="rn">Marge à '+Math.round(pxN).toLocaleString('fr-FR')+'€ : <strong>'+mgN.toFixed(1)+'%</strong></div>';
+    html+='</div>';
+  }
+  html+='<div class="rn">Prix max ≥20% : <strong>'+pxMax.toLocaleString('fr-FR')+'€</strong> (-'+rem+'%)</div>';
+  html+='<div class="rn">'+nl+' lot(s) × '+surfLot+'m² × '+dvf+'€/m² = '+Math.round(revT).toLocaleString('fr-FR')+'€</div>';
+  html+='<div class="rn">Maison '+sm+'m² × '+bati+'€/m²'+(dec>0?' × '+Math.round((1-dec)*100)+'%':'')+' = '+Math.round(revM).toLocaleString('fr-FR')+'€</div>';
+  html+='</div>';
+  r.innerHTML=html;
+  if(typeof autoSave==='function')autoSave();
+}
+
+function calcComplet(){
+  var px=parseFloat(document.getElementById('f_prix').value)||0;
+  var nl=parseFloat(document.getElementById('f_nlots').value)||1;
+  var pm=parseFloat(document.getElementById('f_pmaison').value)||0;
+  var zone=getZone();var r=document.getElementById('calc_r');
+  if(!r)return;
+  if(!px||!zone){r.innerHTML='<p style="font-size:12px;color:#aaa">Remplis l\'onglet 1.</p>';return}
+  var dvf=zone.dvf,bati=zone.bati;
+  var sm=parseFloat(document.getElementById('f_sm').value)||0;
+  var tdiv=parseFloat(document.getElementById('f_tdiv').value)||0;
+  var st=parseFloat(document.getElementById('f_st').value)||0;
+  var stm=parseFloat(document.getElementById('f_st_maison').value)||0;
+  var surf_div=tdiv>0?tdiv:(st>0&&stm>0?st-stm:st);
+  var surf_lot=nl>0&&surf_div>0?Math.max(Math.round(surf_div/nl),300):450;
+  var revT=nl*surf_lot*dvf,revM=pm||(sm*bati)||100000;
+  var rev=revT+revM,fr=px*0.03,ac=px+fr,me=rev-ac,mp=rev>0?(me/rev*100):0;
+  var cls=mp>=20?'go':mp>=15?'warn':'stop';
+  var h='<div class="rb '+cls+'"><div class="rl">'+(mp>=20?'GO visite ≥ 20%':mp>=15?'Limite — affiner onglet 4':'STOP')+'</div></div>';
+  h+='<div class="m3"><div class="mc '+(mp>=20?'g':mp>=15?'w':'s')+'"><div class="v '+(mp>=20?'gt':mp>=15?'wt':'st')+'">'+mp.toFixed(1)+'%</div><div class="lb">Marge rapide</div></div>';
+  h+='<div class="mc"><div class="v">'+Math.round(me).toLocaleString('fr-FR')+'€</div><div class="lb">Marge €</div></div>';
+  h+='<div class="mc"><div class="v">'+Math.round(rev).toLocaleString('fr-FR')+'€</div><div class="lb">Revente</div></div></div>';
+  [['Prix affiché',px],['Notaire ~3%',Math.round(fr)],['Total achat estimé',Math.round(ac)],
+   ['Revente terrain ('+nl+'×'+surf_lot+'m²×'+dvf+'€/m²)',Math.round(revT)],
+   ['Revente maison ('+sm+'m²×'+bati+'€/m²)',Math.round(revM)],
+   ['Revente totale',Math.round(rev)]].forEach(function(row){
+    h+='<div class="fr"><span class="fl">'+row[0]+'</span><span>'+Number(row[1]).toLocaleString('fr-FR')+' €</span></div>';
+  });
+  r.innerHTML=h;
+}
+function addLot(){addLotD({})}
+function addLotD(data){
+  lotCnt++;lotDisplayNum++;var id=lotCnt;lots.push(id);
+  var div=document.createElement('div');div.className='lot-box';div.id='lot_'+id;
+  div.innerHTML='<h5>Lot '+lotDisplayNum+'</h5><div class="r4">'+
+    '<div><span class="lbl">Surface (m²)</span><input type="number" id="ls_'+id+'" value="'+(data.s||'')+'" placeholder="450" oninput="calcMarge();autoSave()"></div>'+
+    '<div><span class="lbl">Opt TTC (€)</span><input type="number" id="lo_'+id+'" value="'+(data.o||'')+'" placeholder="174" oninput="calcMarge();autoSave()"></div>'+
+    '<div><span class="lbl">Réal TTC (€)</span><input type="number" id="lr_'+id+'" value="'+(data.r||'')+'" placeholder="150" oninput="calcMarge();autoSave()"></div>'+
+    '<div><span class="lbl">Pess TTC (€)</span><input type="number" id="lp_'+id+'" value="'+(data.p||'')+'" placeholder="115" oninput="calcMarge();autoSave()"></div>'+
+    '</div><div class="r2" style="margin-top:6px">'+
+    '<div><span class="lbl">Type</span><select id="lt_'+id+'" onchange="calcMarge();autoSave()">'+
+    '<option value="terrain"'+(data.t==='terrain'||!data.t?' selected':'')+'>Terrain à bâtir (TVA 20%)</option>'+
+    '<option value="maison"'+(data.t==='maison'?' selected':'')+'>Maison (TVA 0%)</option>'+
+    '</select></div>'+
+    '<div style="display:flex;align-items:flex-end"><button class="btn btn-sm btn-rd" onclick="removeLot('+id+')">Supprimer</button></div>'+
+    '</div>';
+  document.getElementById('lots_c').appendChild(div);calcMarge();
+}
+function removeLot(id){
+  var el=document.getElementById('lot_'+id);if(el)el.remove();
+  lots=lots.filter(function(l){return l!==id});
+  // Renumeroter les lots affichés
+  lotDisplayNum=0;
+  document.querySelectorAll('#lots_c .lot-box h5').forEach(function(h){
+    lotDisplayNum++;h.textContent='Lot '+lotDisplayNum;
+  });
+  calcMarge();
+}
+function getLIds(){
+  var ids=[];
+  document.querySelectorAll('[id^="ls_"]').forEach(function(el){var id=parseInt(el.id.replace('ls_',''));if(!isNaN(id))ids.push(id)});
+  return ids;
+}
+function getLSave(){
+  return getLIds().map(function(id){return{
+    s:document.getElementById('ls_'+id)?document.getElementById('ls_'+id).value:'',
+    o:document.getElementById('lo_'+id)?document.getElementById('lo_'+id).value:'',
+    r:document.getElementById('lr_'+id)?document.getElementById('lr_'+id).value:'',
+    p:document.getElementById('lp_'+id)?document.getElementById('lp_'+id).value:'',
+    t:document.getElementById('lt_'+id)?document.getElementById('lt_'+id).value:'terrain'
+  }});
+}
+function getLV(id,sc){
+  var s=parseFloat(document.getElementById('ls_'+id)?document.getElementById('ls_'+id).value:0)||0;
+  // lo/lr/lp = montants TTC directs (pas prix/m²)
+  var ttc=sc==='opt'?parseFloat(document.getElementById('lo_'+id)?document.getElementById('lo_'+id).value:0)||0:
+          sc==='real'?parseFloat(document.getElementById('lr_'+id)?document.getElementById('lr_'+id).value:0)||0:
+          parseFloat(document.getElementById('lp_'+id)?document.getElementById('lp_'+id).value:0)||0;
+  var t=document.getElementById('lt_'+id)?document.getElementById('lt_'+id).value:'terrain';
+  var ht=t==='terrain'?ttc/1.2:ttc;
+  return{ttc:ttc,ht:ht,type:t};
+}
+function calcMarge(){
+  var px=parseFloat(document.getElementById('m_prix').value)||0;
+  var geo=parseFloat(document.getElementById('m_geo').value)||0;
+  var tfon=parseFloat(document.getElementById('m_tfon').value)||0;
+  var trav=parseFloat(document.getElementById('m_trav').value)||0;
+  var tax=parseFloat(document.getElementById('m_tax').value)||0;
+  var alea_val=parseFloat(document.getElementById('m_alea').value)||0;
+  var fagence_pct=(parseFloat(document.getElementById('m_fagence').value)||5)/100;
+
+  // FORMULE EXACTE LI (FT-MDB-004 verifie sur Excel Vitre)
+  // C6 = C5*3% (frais mutation automatique)
+  // C9 = alea (valeur saisie directement en euros)
+  // C10 = frais agence lots = -5% TTC lots (negatif)
+  // C11 = frais agence maison = -5% TTC maison (negatif)
+  // TOTAL = px + frais_mut + geo + tfon + trav + tax + alea + fa_lots + fa_maison
+  // Marge% = (CA_HT - TOTAL) / TOTAL * 100
+
+  var frais_mut = px * 0.03;
+  var ids = getLIds();
+  var res = {};
+
+  ['opt','real','pess'].forEach(function(sc){
+    var ca_ht=0, ttc_lots=0, ttc_maison=0;
+    ids.forEach(function(id){
+      var d=getLV(id,sc);
+      ca_ht += d.ht;
+      if(d.type==='terrain') ttc_lots += d.ttc;
+      else ttc_maison += d.ttc;
+    });
+    // Frais agence séparés lots et maison (structure exacte LI)
+    var fa_lots = ttc_lots * fagence_pct;
+    var fa_maison = ttc_maison * fagence_pct;
+    // TOTAL = somme de tous les postes (frais agence en negatif = deduits)
+    var total = px + frais_mut + geo + tfon + trav + tax + alea_val - fa_lots - fa_maison;
+    var marge_nette = ca_ht - total;
+    // FORMULE LI EXACTE : marge = (CA_HT - TOTAL) / TOTAL
+    var m = total > 0 ? (marge_nette / total * 100) : 0;
+    res[sc] = {ca_ht:ca_ht,ttc_lots:ttc_lots,ttc_maison:ttc_maison,
+               fa_lots:fa_lots,fa_maison:fa_maison,total:total,m:m,me:marge_nette};
+  });
+
+  // Affichage synthese
+  var pess = res['pess'];
+  // Stocker pour Live
+  window._lastMargeRes = {opt:res['opt'].m, real:res['real'].m, pess:pess.m, total:pess.total, pxmax:0};
+  var cls = pess.m>=20?'go':pess.m>=15?'warn':'stop';
+  var msg = pess.m>=20?'OK GO visite - pessimiste >= 20%':pess.m>=15?'Limite - renégocier le prix':'STOP - marge pessimiste insuffisante';
+  var syn = '';
+  [{k:'opt',l:'Optimiste'},{k:'real',l:'Réaliste'},{k:'pess',l:'Pessimiste *'}].forEach(function(s){
+    var d=res[s.k],c=d.m>=20?'g':d.m>=15?'w':'s',t=d.m>=20?'gt':d.m>=15?'wt':'st';
+    syn += '<div class="mc '+c+'"><div class="v '+t+'">'+d.m.toFixed(1)+'%</div><div class="lb">'+s.l+'</div></div>';
+  });
+  var _sm=document.getElementById('syn_m');if(_sm)_sm.innerHTML = syn;
+
+  // Detail
+  var det = '<div class="rb '+cls+'"><div class="rl">'+msg+'</div></div>';
+  det += '<div style="font-size:11px;color:#888;margin:4px 0 8px">Formule LI exacte : (CA HT - Total couts) / Total couts </div>';
+  det += '<div style="margin-top:4px">';
+  var frais_mut_r = Math.round(frais_mut);
+  var rows = [
+    ['Prix achat FAI', Math.round(px)],
+    ['Frais mutation (3% auto)', frais_mut_r],
+    ['Géomètre + DP', Math.round(geo)],
+    ['Taxe foncière prorata', Math.round(tfon)],
+    ['Travaux', Math.round(trav)],
+    ['Autres taxes', Math.round(tax)],
+    ['Aléas (€)', Math.round(alea_val)],
+    ['Frais agence lots -'+Math.round(fagence_pct*100)+'%', -Math.round(pess.fa_lots)],
+    ['Frais agence maison -'+Math.round(fagence_pct*100)+'%', -Math.round(pess.fa_maison)],
+    ['Total coûts (pess)', Math.round(pess.total)],
+    ['CA HT revente (pess)', Math.round(pess.ca_ht)],
+    ['Marge nette (pess)', Math.round(pess.me)]
+  ];
+  rows.forEach(function(row,i){
+    det += '<div class="fr'+(i>=9?' tot':'')+'"><span class="fl">'+row[0]+'</span><span>'+Number(row[1]).toLocaleString('fr-FR')+' €</span></div>';
+  });
+  det += '</div>';
+
+  // Validation Vitre
+  var _rd=document.getElementById('res_d');if(_rd)_rd.innerHTML = det;
+
+  // Prix max offre
+  // On cherche px_max tel que marge = 20%
+  // 20% = (ca_ht - total) / total => total = ca_ht / 1.2
+  // total = px + px*0.03 + geo + tfon + trav + tax + alea - fa_lots - fa_maison
+  // fa = (ttc_lots + ttc_maison) * fagence -- mais ttc depend de px via les lots fixes
+  // Approximation : px_max = ca_ht_pess/1.2 - (geo+tfon+trav+tax+alea) + fa_pess
+  var fa_total_pess = pess.fa_lots + pess.fa_maison;
+  var frais_fixes = geo + tfon + trav + tax + alea_val;
+  var px_max = (pess.ca_ht/1.2 - frais_fixes + fa_total_pess) / 1.03;
+  var _pm=document.getElementById('px_max');if(_pm)_pm.innerHTML = '<div class="rb warn"><div class="rl">Prix max achat pour 20% pessimiste</div>'+
+    '<div style="font-size:20px;font-weight:600;margin:5px 0">'+Math.round(px_max).toLocaleString('fr-FR')+' euros</div>'+
+    '<div class="rn">Si prix vendeur > ce montant - négocier ou abandonner</div></div>';
+}
+
+function showPlu(){
+  var z=document.getElementById('z_plu').value;
+  var m={'U':'<div class="rb go"><div class="rl">Zone U — Constructible</div><div class="rn">GO → marge complète onglet 4. Si pessimiste ≥ 20% → planifier la visite.</div></div>',
+    'A':'<div class="rb stop"><div class="rl">Zone A — Agricole — STOP</div><div class="rn">Non constructible. Bien suivant.</div></div>',
+    'N':'<div class="rb stop"><div class="rl">Zone N — Naturelle — STOP</div><div class="rn">Non constructible. Bien suivant.</div></div>',
+    'AU':'<div class="rb warn"><div class="rl">Zone AU — Vérifier</div><div class="rn">Appeler service urbanisme mairie avant de continuer.</div></div>'};
+  var _pr=document.getElementById('plu_r');if(_pr)_pr.innerHTML=m[z]||'';
+}
+function renderHist(){if(!document.getElementById('hist_list'))return;
+  var b=GB(),k=Object.keys(b),tot=k.length;
+  var go=k.filter(function(id){return b[id].statut==='GO'}).length;
+  var stop=k.filter(function(id){return b[id].statut==='STOP'}).length;
+  var _dash=document.getElementById('dash');if(_dash)_dash.innerHTML=
+    '<div class="mc"><div class="v">'+tot+'</div><div class="lb">Analysés</div></div>'+
+    '<div class="mc g"><div class="v gt">'+go+'</div><div class="lb">GO</div></div>'+
+    '<div class="mc s"><div class="v st">'+stop+'</div><div class="lb">STOP</div></div>'+
+    '<div class="mc"><div class="v">'+(tot>0?(go/tot*100).toFixed(0):0)+'%</div><div class="lb">Taux GO</div></div>';
+  var h=tot?'':'<p style="font-size:12px;color:#aaa">Aucun bien enregistré.</p>';
+  k.slice().reverse().forEach(function(id){
+    var d=b[id],cls=d.statut==='GO'?'tg':'ts';
+    h+='<div class="hist-item"><div style="display:flex;align-items:center;gap:7px;margin-bottom:3px">';
+    h+='<span class="tag '+cls+'">'+(d.statut||'—')+'</span>';
+    h+='<span style="font-size:13px;font-weight:500">'+d.ref+'</span>';
+    if(d.marge_pre) h+='<span class="tag ti">'+d.marge_pre+'%</span>';
+    h+='<span style="font-size:11px;color:#aaa;margin-left:auto">'+(d.created||'')+'</span></div>';
+    if(d.adresse) h+='<div style="font-size:12px;color:#666">'+d.adresse+'</div>';
+    h+='<button class="btn btn-sm" onclick="loadBienById(\''+id+'\')" style="margin-top:5px;font-size:11px">Ouvrir</button></div>';
+  });
+  var _hl=document.getElementById('hist_list');if(_hl)_hl.innerHTML=h;
+}
+function loadBienById(id){document.getElementById('b_sel').value=id;loadBien();ST('t1')}
+function autoFillLots(){
+  var zone = getZone();
+  if(!zone){alert('Sélectionner une zone onglet 1 dabord');return;}
+  var sm = parseFloat(document.getElementById('f_sm').value)||0;
+  var tdiv = parseFloat(document.getElementById('f_tdiv').value)||0;
+  var nlots = parseFloat((document.getElementById('f_nlots_manual')||{}).value)||parseFloat(document.getElementById('f_nlots').value)||2;
+  var px = parseFloat(document.getElementById('f_prix').value)||0;
+  // Copier les valeurs de onglet 1 vers onglet 3 si vides
+  if(px>0){
+    document.getElementById('m_prix').value = px;
+    document.getElementById('m_not').value = Math.round(px*0.03);
+    if(!document.getElementById('m_geo').value) document.getElementById('m_geo').value = 2500;
+    if(!document.getElementById('m_tfon').value) document.getElementById('m_tfon').value = 700;
+    document.getElementById('m_travaux') && (document.getElementById('m_travaux').value = document.getElementById('m_travaux').value||0);
+    document.getElementById('m_tax') && (document.getElementById('m_tax').value = document.getElementById('m_tax').value||0);
+  }
+  var dvf = zone.dvf;
+  var bati = zone.bati;
+  // Supprimer lots existants
+  document.getElementById('lots_c').innerHTML='';
+  lots=[];lotCnt=0;lotDisplayNum=0;
+  // Créer lots terrains avec prix DVF 3 scénarios
+  // Optimiste = fourchette haute, Réaliste = médiane, Pessimiste = fourchette basse
+  var dvf_opt, dvf_real, dvf_pess;
+  var bati_opt, bati_real, bati_pess;
+  // Utiliser les fourchettes de l'analyse marché
+  if(zone.dvf===115){
+    dvf_opt=183; dvf_real=145; dvf_pess=108; // Changé/proxy fourchettes
+  } else if(zone.dvf===126 && zone.marche.indexOf('RECOURS')>=0){
+    dvf_opt=204; dvf_real=164; dvf_pess=126; // Fougères
+  } else {
+    dvf_opt=217; dvf_real=174; dvf_pess=126; // Vitré fourchettes
+  }
+  // Bâti : +15% opt, médiane réal, -10% pess
+  bati_opt = Math.round(bati*1.15);
+  bati_real = bati;
+  bati_pess = Math.round(bati*0.90);
+  // Surface par lot = tdiv / nlots (arrondi à 1m²)
+  var surf_lot = nlots>0 ? Math.round(tdiv/nlots) : 450;
+  surf_lot = Math.max(surf_lot, 300);
+  // Créer les lots terrains
+  for(var i=0; i<nlots; i++){
+    addLotD({
+      s: surf_lot,
+      o: Math.round(surf_lot * dvf_opt),
+      r: Math.round(surf_lot * dvf_real),
+      p: Math.round(surf_lot * dvf_pess),
+      t: 'terrain'
+    });
+  }
+  // Créer lot maison si surface > 0
+  if(sm > 0){
+    var etat_decote = parseFloat(document.getElementById('m_etat') ? document.getElementById('m_etat').value : 0)||0;
+    // Pessimiste = fourchette haute LI : rafraîch -15% / rénov légère -23%
+    var decote_pess = etat_decote > 0 ? 1 - Math.min(etat_decote + 0.03, 0.25) : 0;
+    var decote_real = 1 - etat_decote;
+    var decote_opt  = 1 - etat_decote * 0.5;
+    // Override manuel prix maison si rempli
+    var prix_maison_manuel = parseFloat((document.getElementById('m_prix_maison_manuel')||{}).value)||0;
+    var p_pess = prix_maison_manuel > 0 ? prix_maison_manuel : Math.round(sm * bati_real * decote_pess);
+    var p_real = prix_maison_manuel > 0 ? Math.round(prix_maison_manuel * 1.08) : Math.round(sm * bati_real * decote_real);
+    var p_opt  = prix_maison_manuel > 0 ? Math.round(prix_maison_manuel * 1.15) : Math.round(sm * bati_real * decote_opt);
+    addLotD({
+      s: sm,
+      o: p_opt,
+      r: p_real,
+      p: p_pess,
+      t: 'maison'
+    });
+  }
+  // Aléa auto = 5% du total achat sans aléa
+  var px = parseFloat(document.getElementById('m_prix').value)||0;
+  var not = parseFloat(document.getElementById('m_not').value)||0;
+  var geo = parseFloat(document.getElementById('m_geo').value)||0;
+  var tfon = parseFloat(document.getElementById('m_tfon').value)||0;
+  if(px>0){
+    var alea_auto = Math.round((px+not+geo+tfon)*0.05);
+    document.getElementById('m_alea').value = alea_auto;
+  }
+  calcMarge();
+  autoSave();
+}
+function appliquerNego(){
+  var px=parseFloat(document.getElementById('f_prix').value)||0;
+  var np=parseFloat(document.getElementById('f_nego_pct').value)||0;
+  if(!px){alert('Saisis le prix affiché onglet 1 dabord.');return;}
+  var pxN=Math.round(px*(1-np/100));
+  document.getElementById('m_prix').value=pxN;
+  document.getElementById('m_not').value=Math.round(pxN*0.03);
+  calcMarge();autoSave();
+}
+function checkNeuf(){
+  var neuf_m2 = parseFloat(document.getElementById('m_neuf').value)||0;
+  var el = document.getElementById('neuf_check');
+  if(!el || neuf_m2<=0) return;
+  var sm = parseFloat(document.getElementById('f_sm').value)||0;
+  if(sm<=0){el.innerHTML='<span style="color:#888">Saisis la surface maison onglet 1 pour calculer</span>';return;}
+  var neuf_total = neuf_m2 * sm;
+  var max_revente = Math.round(neuf_total * 0.85); // -15%
+  var min_revente = Math.round(neuf_total * 0.80); // -20%
+  el.innerHTML = '<span style="color:#166534">✅ Neuf '+sm+'m² × '+neuf_m2+'€/m² = '+Math.round(neuf_total).toLocaleString('fr-FR')+'€ → Revente maison entre <strong>' +
+    min_revente.toLocaleString('fr-FR') + '€</strong> et <strong>' +
+    max_revente.toLocaleString('fr-FR') + '€</strong> (15-20% sous le neuf)</span>';
+}
+function addRdv(){
+  var date=document.getElementById('rdv_date').value;
+  var heure=document.getElementById('rdv_heure').value;
+  var desc=document.getElementById('rdv_desc').value;
+  if(!desc)return;
+  var rdvs=JSON.parse(localStorage.getItem('mdb_rdvs')||'[]');
+  rdvs.push({date:date,heure:heure,desc:desc});
+  rdvs.sort(function(a,b){return (a.date+a.heure)<(b.date+b.heure)?-1:1});
+  localStorage.setItem('mdb_rdvs',JSON.stringify(rdvs));
+  renderRdvs();
+  document.getElementById('rdv_desc').value='';
+  document.getElementById('rdv_date').value='';
+}
+function renderRdvs(){
+  var rdvs=JSON.parse(localStorage.getItem('mdb_rdvs')||'[]');
+  var el=document.getElementById('rdv_list');
+  if(!el)return;
+  if(!rdvs.length){el.innerHTML='<p style="color:#aaa;font-size:12px">Aucun rendez-vous planifié.</p>';return;}
+  el.innerHTML=rdvs.map(function(r,i){
+    return '<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#f8f7f4;border-radius:7px">'+
+      '<span style="font-size:12px;color:#888;white-space:nowrap">'+(r.date||'')+(r.heure?' '+r.heure:'')+'</span>'+
+      '<span style="flex:1;font-size:13px">'+r.desc+'</span>'+
+      '<button onclick="deleteRdv('+i+')" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:14px">✕</button>'+
+      '</div>';
+  }).join('');
+}
+function deleteRdv(i){
+  var rdvs=JSON.parse(localStorage.getItem('mdb_rdvs')||'[]');
+  rdvs.splice(i,1);
+  localStorage.setItem('mdb_rdvs',JSON.stringify(rdvs));
+  renderRdvs();
+}
+function genMailGeo(){
+  var adresse = document.getElementById('f_adresse') ? document.getElementById('f_adresse').value : '';
+  var nlots = document.getElementById('f_nlots') ? document.getElementById('f_nlots').value : '';
+  if(!adresse) adresse = '[ADRESSE — à compléter depuis onglet 2·Appel]';
+  if(!nlots) nlots = '[NOMBRE]';
+  var el = document.getElementById('mail_geo_content');
+  if(!el) return;
+  el.textContent = 'Objet : Demande de devis pour une division parcellaire\n\nMadame, Monsieur,\n\nJe me permets de vous contacter dans le cadre d\'un projet de division parcellaire concernant un terrain situé à ' + adresse + ', que je souhaite diviser en ' + nlots + ' parcelles.\n\nJe vous serai reconnaissant de bien vouloir me faire parvenir un devis détaillé incluant :\n• La réalisation d\'un bornage / délimitation des parcelles\n• La préparation des plans de division\n• Les démarches administratives (déclarations en mairie, etc.)\n• Les autres frais éventuels liés à cette opération\n\nLe devis est à adresser à BAT Investissement, 41 rue des Souchets, 74130 Bonneville.\nJe vous transmets en pièce jointe une projection de mon projet de division.\n\nCédric Buard — Marchand de biens';
+}
+function copierMailGeo(){
+  var el=document.getElementById('mail_geo_content');
+  if(!el)return;
+  var txt=el.innerText||el.textContent;
+  navigator.clipboard.writeText(txt).then(function(){
+    var ok=document.getElementById('mail_geo_copied');
+    if(ok){ok.style.display='inline';setTimeout(function(){ok.style.display='none'},2000);}
+  }).catch(function(){
+    var ta=document.createElement('textarea');
+    ta.value=txt;document.body.appendChild(ta);ta.select();
+    document.execCommand('copy');document.body.removeChild(ta);
+    var ok=document.getElementById('mail_geo_copied');
+    if(ok){ok.style.display='inline';setTimeout(function(){ok.style.display='none'},2000);}
+  });
+}
+function copierSMS(){
+  var el=document.getElementById('sms_content');
+  if(!el)return;
+  var txt=el.innerText||el.textContent;
+  navigator.clipboard.writeText(txt).then(function(){
+    var ok=document.getElementById('sms_copied');
+    if(ok){ok.style.display='inline';setTimeout(function(){ok.style.display='none'},2000);}
+  }).catch(function(){
+    // Fallback
+    var ta=document.createElement('textarea');
+    ta.value=txt;document.body.appendChild(ta);ta.select();
+    document.execCommand('copy');document.body.removeChild(ta);
+    var ok=document.getElementById('sms_copied');
+    if(ok){ok.style.display='inline';setTimeout(function(){ok.style.display='none'},2000);}
+  });
+}
+// Flash sur clic des boutons liens
+document.addEventListener('click',function(e){
+  var el=e.target.closest('.btn-lien');
+  if(el){
+    el.classList.remove('flash');
+    void el.offsetWidth; // reflow
+    st.add('flash');
+    setTimeout(function(){el.classList.remove('flash');},400);
+  }
+});
+function ouvrirLien(id){
+  var el=document.getElementById(id);
+  if(!el||!el.value.trim()){alert('Colle d\'abord le lien Drive dans le champ.');return;}
+  window.open(el.value.trim(),'_blank');
+}
+function ouvrirPresentation(){
+  var url=document.getElementById('f_outil_pres');
+  var urlVal=url?url.value.trim():'https://majordomeprestige-sketch.github.io/outil-live-mdb/';
+  if(!urlVal)urlVal='https://majordomeprestige-sketch.github.io/outil-live-mdb/';
+  window.open(urlVal,'_blank');
+}
+function showLive(id){
+  document.querySelectorAll('.lv-screen').forEach(function(s){s.style.display='none'});
+  document.querySelectorAll('.lv-btn').forEach(function(b){b.classList.remove('active-lv')});
+  var el=document.getElementById(id);if(el)el.style.display='block';
+  var btn=document.getElementById('btn-'+id);if(btn)btn.classList.add('active-lv');
+}
+function syncLive(){
+  var adr=val('f_adresse');
+  var prix=val('f_prix');
+  var sm=val('f_sm');
+  var st=val('f_st');
+  var stm=val('f_st_maison');
+  var agent=val('f_agent');
+  var assainis=val('f_assainis');
+  var duree=val('f_duree');
+  var motif=val('f_motif');
+  var zone=val('f_zone');
+
+  // Remplir les inputs du Dossier depuis GPS
+  setVal('lv_adresse', val('f_adresse'));
+  setVal('lv_prix', val('f_prix'));
+  setVal('lv_sm', val('f_sm'));
+  setVal('lv_st', val('f_st'));
+  setVal('lv_stm', val('f_st_maison'));
+  setVal('lv_duree', val('f_duree'));
+  setVal('lv_motif', val('f_motif'));
+  // Etat bien
+  var etatGPS=val('f_etat_bien');
+  var etatEl=document.getElementById('lv_etat');
+  if(etatEl){
+    if(etatGPS==='0.12') etatEl.value='Rafraîchissement simple';
+    else if(etatGPS==='0.20') etatEl.value='Rénovation légère';
+    else etatEl.value='Bon état';
+  }
+  // Marges depuis calcul
+  var res=window._lastMargeRes||{};
+  if(res.pess){setVal('lv_pess',res.pess.toFixed(1));setVal('lv_real',res.real?res.real.toFixed(1):'');setVal('lv_opt',res.opt?res.opt.toFixed(1):'');}
+  if(typeof refreshSlides==='function') refreshSlides();
+
+  // Etat bien
+  var etatGPS=val('f_etat_bien');
+  var etatEl=document.getElementById('lv_etat');
+  if(etatEl){
+    if(etatGPS==='0.12') etatEl.value='Rafraîchissement simple (-15% pessimiste)';
+    else if(etatGPS==='0.20') etatEl.value='Rénovation légère (-23% pessimiste)';
+    else etatEl.value='Bon état (0%)';
+  }
+
+  // Marge depuis résultats calcul
+  var res=window._lastMargeRes||{};
+  if(res.pess) setVal('lv_pess', res.pess.toFixed(1));
+
+  // Prix max depuis onglet 4
+  var pxmaxEl=document.getElementById('res_d');
+  var pxmax=val('lv_pxmax');
+
+  var etat=val('lv_etat')||etatEl&&etatEl.value||'';
+  var plu=val('lv_plu');
+  var voirie=val('lv_voirie');
+  var mairie=val('lv_mairie');
+  var tdiv=stm&&st?Math.max(parseFloat(st)-parseFloat(stm),0):'';
+
+  // Live 1
+  setText('lv1-adr',adr);
+  setText('lv1-sm',sm?sm+' m²':'—');
+  setText('lv1-st',st?st+' m²':'—');
+  setText('lv1-tdiv',tdiv?tdiv+' m²':'—');
+  setText('lv1-etat',etat||'—');
+  setText('lv1-assainis',assainis||'—');
+  setText('lv1-agent',agent||'—');
+  setText('lv1-plu',plu||'—');
+  setText('lv1-voirie',voirie||'—');
+  setText('lv1-mairie',mairie||'—');
+
+  // Lots Live 1
+  var nl=parseInt(val('f_nlots_manual'))||parseInt(val('f_nlots'))||0;
+  var surf=nl&&tdiv?Math.round(tdiv/nl):0;
+  var l1lots=document.getElementById('lv1-lots');
+  if(l1lots&&nl){var h='';for(var i=1;i<=nl;i++){h+='<div class="dv-row"><span class="dv-l">Lot '+i+' terrain</span><span class="dv-v">~'+surf+' m²</span></div>';}l1lots.innerHTML=h;}
+
+  // Live 2
+  var prixN=parseFloat(prix)||0;
+  setText('lv2-prix',prix?Math.round(prixN).toLocaleString('fr-FR')+' €':'—');
+  setText('lv2-not',prix?Math.round(prixN*0.03).toLocaleString('fr-FR')+' €':'—');
+  setText('lv2-alea',prix?Math.round(prixN*0.05).toLocaleString('fr-FR')+' €':'—');
+  setText('lv2-total',res.total?Math.round(res.total).toLocaleString('fr-FR')+' €':'—');
+  setText('lv2-pxmax',pxmax?Math.round(parseFloat(pxmax)).toLocaleString('fr-FR')+' €':'—');
+  setText('lv2-duree',duree||'—');
+  setText('lv2-motif',motif||'—');
+  setText('lv2-offprec',val('f_v_offres')||'—');
+  setText('lv2-zone',zone||'—');
+
+  // Marges
+  if(res.opt) setText('lv2-opt',res.opt.toFixed(1)+'%');
+  if(res.real) setText('lv2-real',res.real.toFixed(1)+'%');
+  if(res.pess){
+    setText('lv2-pess',res.pess.toFixed(1)+'%');
+    var pb=document.getElementById('lv2-pess-box');
+    if(pb){pb.style.background=res.pess>=20?'#f0fdf4':'#fef2f2';pb.style.borderColor=res.pess>=20?'#bbf7d0':'#fca5a5';}
+  }
+
+  // Live 3
+  var offre=val('lv_offre')||val('f_offre');
+  setText('lv3-affiche',prix?Math.round(prixN).toLocaleString('fr-FR')+' €':'—');
+  setText('lv3-pxmax',pxmax?Math.round(parseFloat(pxmax)).toLocaleString('fr-FR')+' €':'—');
+  setText('lv3-offre',offre?Math.round(parseFloat(offre)).toLocaleString('fr-FR')+' €':'—');
+  setText('lv3-agent',agent||'—');
+}
+function val(id){var e=document.getElementById(id);return e?e.value:'';}
+function setText(id,v){var e=document.getElementById(id);if(e)e.textContent=v||'—';}
+function setVal(id,v){var e=document.getElementById(id);if(e&&v!==undefined&&v!=='')e.value=v;}
+refreshSel();addLot();addLot();ST('t1');
+// Sync Live au chargement
+setTimeout(syncLive,300);
+// Render différé pour éviter erreurs si éléments pas encore dans DOM
+setTimeout(function(){
+  if(document.getElementById('rdv_list')) renderRdvs();
+  if(document.getElementById('hist_list')) renderHist();
+  
+}, 100);
+
+
+</script>
+</body>
+</html>
